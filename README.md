@@ -27,6 +27,7 @@ az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/A
 
 az provider register --namespace Microsoft.ContainerService
 az provider register --namespace Microsoft.Network
+```
 
 
 ## Create a private AKS cluster
@@ -42,4 +43,5 @@ az provider register --namespace Microsoft.Network
      
     kubectl create clusterrolebinding kubernetes-dashboard -n kube-system --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard
     az aks browse --resource-group <your rg name> --name <your aks name>
+    ```
    
