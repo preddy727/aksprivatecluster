@@ -1,93 +1,43 @@
-# Infrastructure as Code on Azure
+# Azure Kubernetes 
 ## Overview
 
-Deploy a sample Tomcat Application on an Azure Virtual Machine Scale Set
+Create a private Azure Kubernetes Service cluster
 
 ## Pre-requisites 
-Option 1 for Ubuntu management VM  
-* Create a Terraform Ubuntu virtual machine with managed identities using a marketplace template [here](https://docs.microsoft.com/en-us/azure/terraform/terraform-vm-msi)
-
-Option 2 for CentOS management VM 
-
-
-
-* Create a Terraform Centos virtual machine with managed identities. 
-   - Source code - AzureTerraformTemplates/POCtoPattern/MgmtVmMI/
-   - Populate variables.tf and run terraform apply within folder 
-
-Setup Steps
-* Contributor permission helps MSI on VM to use Terraform to create resources outside the VM resource group. You can easily achieve this action by running a script once inside the Terraform Linux vm. ~/tfEnv.sh
-* The VM has a Terraform remote state back end. To enable it on your Terraform deployment, copy the remoteState.tf file from tfTemplate directory to the root of the Terraform scripts. cp ~/tfTemplate/remoteState.tf .
-* Install the Packer precompiled binary on the Terraform VM [download](https://www.packer.io/intro/getting-started/install.html#precompiled-binaries)
-* Clone the Github repository to the Terraform VM [download](https://github.com/preddy727/AzureTerraformTemplates.git)
-
-## Recommended Reading
-* Series of Labs for Terraform on Azure [here](https://azurecitadel.com/automation/terraform/)
+The Azure CLI version 2.0.77 or later, and the Azure CLI AKS Preview extension version 0.4.18
 
 ### Architecture Diagram
 * Process flow ![alt text](https://github.com/preddy727/AzureTerraformTemplates/blob/master/Images/architecture.png)
 
 ## Goals of the Lab
-1. Create a customized Ubuntu managed image with Tomcat installed 
-2. Store the image in a shared image gallery
-3. Create a Key Vault enabled for disk encryption and a Key
-4. Deploy a Virtual machine scale set
-    * Enable service endpoint for Key Vault. 
-    * Update key vault access policy to allow scale set subnet. 
-    * Enable disk encryption extension and associate with key
-5. Access Tomcat webpage 
+1. Create a private AKS cluster.   
 
-## Exercises
+## Install the latest Azure CLI AKS Preview extension
 
-* [Create a customized Ubuntu managed image with Tomcat installed](#Custom-Ubuntu-Tomcat-with-Packer)
-* [Create a Key Vault enabled for disk encryption and a Key](#create-the-key-vault-disk-encryption-with-key)
-* [Deploy a Virtual machine scale set](#deploy-a-vmss)
-* [Access Tomcat webpage](#Access-the-tomcat-webpage)
+# Install the aks-preview extension
+az extension add --name aks-preview
 
+# Update the extension to make sure you have the latest version installed
+az extension update --name aks-preview
 
-## Custom Ubuntu Tomcat image with Packer
-### [Back to Excercises](#exercises)
+az feature register --name AKSPrivateLinkPreview --namespace Microsoft.ContainerService
+az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/AKSPrivateLinkPreview')].{Name:name,State:properties.state}"
 
-Start Here by reading the following document on how to build an Azure build pipeline 
-POCtoPattern/Azure Build pipeline - Customized image in Shared Image Gallery.docx
-
-1. Create an Azure DevOps project
-
-2. Import the  Packer json into Azure repot
-
-3. Install the hosted build agent into the Terraform linux vm 
-
-4. Setup a build pipeline with tasks using the replace tokens module to populate environment variables into the json file. 
-
-- Documentation is in Azure Build pipeline - Customized image in Shared Image Gallery.docx
-
-5. The output is a customized managed image. 
-
-6. Note the resource group and name of the final managed image. 
+az provider register --namespace Microsoft.ContainerService
+az provider register --namespace Microsoft.Network
 
 
-## Create the key vault disk encryption with key
-### [Back to Excercises](#exercises)
+## Create a private AKS cluster
+```powershell
+    az login
+    az account set --subscription <your subscription name>
 
-1.Login to Terraform vm with a managed identity where github repository was cloned and run the following commands.
-
-2. Change to the Source directory for key vault which is AzureTerraformTemplates/POCtoPattern/KeyVaultDiskEncryption/
-
-3. 
-export ARM_USE_MSI=true
-
-Terraform init 
-
-Terraform apply -out output
-
-
-
-## Deploy a Virtual machine scale set
-### [Back to Excercises](#exercises)
-
-Create a release pipeline using the shared image gallery build artificat created in 
-
-AzureTerraformTemplates/POCtoPattern/Azure Release pipeline - Deply Scale Set using customized tomcat image in SIG.docx
-
-## Access Tomcat webpage
-### [Back to Excercises](#exercises)
+    #create resource group
+    az group create --name <your rg name> --location eastus
+    az aks create -n <private-cluster-name> -g <private-cluster-resource-group> --load-balancer-sku standard --enable-private-cluster
+    az aks install-cli
+    az aks get-credentials --resource-group <your rg name> --name <your aks name>
+     
+    kubectl create clusterrolebinding kubernetes-dashboard -n kube-system --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard
+    az aks browse --resource-group <your rg name> --name <your aks name>
+   
