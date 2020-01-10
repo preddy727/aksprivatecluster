@@ -1,7 +1,9 @@
 # Azure Kubernetes 
 ## Overview
 
-Create a private Azure Kubernetes Service cluster
+Create a private Azure Kubernetes Service cluster and access kubectl commands (Control Plane) through a private endpoint.  
+Deploy ACR with a service endpoint. 
+Access ingress controller through private endpoint. 
 
 ## Pre-requisites 
 The Azure CLI version 2.0.77 or later, and the Azure CLI AKS Preview extension version 0.4.18
