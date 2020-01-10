@@ -70,7 +70,7 @@ az network private-dns link vnet create -g Bastion -n MyDNSLinktoBastion -z 1392
 
 
 
-##################Setup ACR################
+### Setup ACR
 ```powershell
 git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
 cd azure-voting-app-redis
@@ -87,7 +87,7 @@ sudo docker tag azure-vote-front attacr.azurecr.io/azure-vote-front:v1
 sudo docker push attacr.azurecr.io/azure-vote-front:v1
 az acr repository list --name attacr --output table
 ```
-############################Deploy application###############################################
+### Deploy application
 ```powershell
 az acr create --resource-group aksdemo --name attacr --sku Standard --location westus 
 AKS_RESOURCE_GROUP="aksdemo"
