@@ -7,7 +7,7 @@ Create a private Azure Kubernetes Service cluster
 The Azure CLI version 2.0.77 or later, and the Azure CLI AKS Preview extension version 0.4.18
 
 ### Architecture Diagram
-* Process flow ![alt text](https://github.com/preddy727/AzureTerraformTemplates/blob/master/Images/architecture.png)
+* Process flow ![alt text](https://github.com/preddy727/aksprivatecluster/blob/master/Images/plsaks.png)
 
 ## Goals of the Lab
 1. Create a private AKS cluster.   
