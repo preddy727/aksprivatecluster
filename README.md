@@ -32,16 +32,16 @@ az provider register --namespace Microsoft.Network
 
 ## Create a private AKS cluster
 ```powershell
-    az login
-    az account set --subscription <your subscription name>
+az login
+az account set --subscription <your subscription name>
 
-    #create resource group
-    az group create --name <your rg name> --location eastus
-    az aks create -n <private-cluster-name> -g <private-cluster-resource-group> --load-balancer-sku standard --enable-private-cluster
-    az aks install-cli
-    az aks get-credentials --resource-group <your rg name> --name <your aks name>
-     
-    kubectl create clusterrolebinding kubernetes-dashboard -n kube-system --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard
-    az aks browse --resource-group <your rg name> --name <your aks name>
+#create resource group
+az group create --name <your rg name> --location eastus
+az aks create -n <private-cluster-name> -g <private-cluster-resource-group> --load-balancer-sku standard --enable-private-cluster
+az aks install-cli
+az aks get-credentials --resource-group <your rg name> --name <your aks name>
+
+kubectl create clusterrolebinding kubernetes-dashboard -n kube-system --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard
+az aks browse --resource-group <your rg name> --name <your aks name>
 ```
    
