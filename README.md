@@ -15,9 +15,11 @@ The Azure CLI version 2.0.77 or later, and the Azure CLI AKS Preview extension v
 ## Install the latest Azure CLI AKS Preview extension
 
 # Install the aks-preview extension
+```powershell
 az extension add --name aks-preview
 
 # Update the extension to make sure you have the latest version installed
+```powershell
 az extension update --name aks-preview
 
 az feature register --name AKSPrivateLinkPreview --namespace Microsoft.ContainerService
