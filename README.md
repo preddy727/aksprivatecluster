@@ -42,10 +42,26 @@ az group create --name <your rg name> --location <eastus2>
 version=$(az aks get-versions -l <eastus2> --query 'orchestrators[-1].orchestratorVersion' -o tsv)
 ################Create Private Cluster########################
 az aks create -n <private-cluster-name> -g aksdemo --load-balancer-sku standard --enable-private-cluster --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <eastus2>
+```
 
+## Validate connectivity to cluster
+```powershell 
+Run the following from the Bastion VM that has access to the endpoint created in the Bastion Subnet. 
 
+Connect to the cluster
+To manage a Kubernetes cluster, you use kubectl, the Kubernetes command-line client. If you use Azure Cloud Shell, kubectl is already installed. To install kubectl locally, use the az aks install-cli command:
+Azure CLI 
 az aks install-cli
-az aks get-credentials --resource-group <your rg name> --name <your aks name>
+To configure kubectl to connect to your Kubernetes cluster, use the az aks get-credentials command. This command downloads credentials and configures the Kubernetes CLI to use them.
+Azure CLI  
+az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
+To verify the connection to your cluster, use the kubectl get command to return a list of the cluster nodes.
+Azure CLI 
+kubectl get nodes
+The following example output shows the single node created in the previous steps. Make sure that the status of the node is Ready:
+	NAME                       STATUS   ROLES   AGE     VERSION
+	aks-nodepool1-31718369-0   Ready    agent   6m44s   v1.12.8
+
 
 kubectl create clusterrolebinding kubernetes-dashboard -n kube-system --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard
 az aks browse --resource-group <your rg name> --name <your aks name>
