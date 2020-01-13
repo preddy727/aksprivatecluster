@@ -44,6 +44,26 @@ version=$(az aks get-versions -l <eastus2> --query 'orchestrators[-1].orchestrat
 az aks create -n <private-cluster-name> -g aksdemo --load-balancer-sku standard --enable-private-cluster --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <eastus2>
 ```
 
+
+### Create a Private endpoint in the Bastion VNET and link vnet to private-dns 
+```powershell
+################Retrieve AKS Resource ID######################
+aksresourceid=$(az aks show --name aksattcluswestus2 --resource-group aksdemo --query 'id' -o tsv)
+################Retrieve the MC Resource Group################
+noderg=$(az aks show --name aksattcluswestus2 --resource-group aksdemo --query 'nodeResourceGroup' -o tsv) 
+az resource list --resource-group $noderg
+##############Create subnet, disable private endpoint network policies, create private endpoint############
+az network vnet subnet create --name BastionPESubnet2 --resource-group Bastion --vnet-name BastionVMVNET --address-prefixes 10.0.4.0/24
+az network vnet subnet update --name BastionPESubnet2 --resource-group Bastion --vnet-name BastionVMVNET --disable-private-endpoint-network-policies true
+az network private-endpoint create --name PrivateKubeApiEndpoint2 --resource-group Bastion --vnet-name BastionVMVNET --subnet BastionPESubnet2 --private-connection-resource-id $aksresourceid --group-ids management --connection-name myKubeConnection
+sudo az aks install-cli
+az aks get-credentials --resource-group aksdemo --name aksattcluswestus2
+
+az network private-dns zone create -g Bastion -n 1392a07c-ad38-49fd-b65e-86f45e099abb.westus2.azmk8s.io
+az network private-dns record-set a add-record -g Bastion -z 1392a07c-ad38-49fd-b65e-86f45e099abb.westus2.azmk8s.io -n aksattclus-aksdemo-c24839-686c6cd4 -a 10.0.3.4
+az network private-dns link vnet create -g Bastion -n MyDNSLinktoBastion -z 1392a07c-ad38-49fd-b65e-86f45e099abb.westus2.azmk8s.io -v BastionVMVNET -e true
+```
+
 ## Validate connectivity to cluster
 ```powershell 
 Run the following from the Bastion VM that has access to the endpoint created in the Bastion Subnet. 
@@ -69,24 +89,6 @@ kubectl create clusterrolebinding kubernetes-dashboard -n kube-system --clusterr
 az aks browse --resource-group <your rg name> --name <your aks name>
 ```
 
-### Create a Private endpoint in the Bastion VNET and link vnet to private-dns 
-```powershell
-################Retrieve AKS Resource ID######################
-aksresourceid=$(az aks show --name aksattcluswestus2 --resource-group aksdemo --query 'id' -o tsv)
-################Retrieve the MC Resource Group################
-noderg=$(az aks show --name aksattcluswestus2 --resource-group aksdemo --query 'nodeResourceGroup' -o tsv) 
-az resource list --resource-group $noderg
-##############Create subnet, disable private endpoint network policies, create private endpoint############
-az network vnet subnet create --name BastionPESubnet2 --resource-group Bastion --vnet-name BastionVMVNET --address-prefixes 10.0.4.0/24
-az network vnet subnet update --name BastionPESubnet2 --resource-group Bastion --vnet-name BastionVMVNET --disable-private-endpoint-network-policies true
-az network private-endpoint create --name PrivateKubeApiEndpoint2 --resource-group Bastion --vnet-name BastionVMVNET --subnet BastionPESubnet2 --private-connection-resource-id $aksresourceid --group-ids management --connection-name myKubeConnection
-sudo az aks install-cli
-az aks get-credentials --resource-group aksdemo --name aksattcluswestus2
-
-az network private-dns zone create -g Bastion -n 1392a07c-ad38-49fd-b65e-86f45e099abb.westus2.azmk8s.io
-az network private-dns record-set a add-record -g Bastion -z 1392a07c-ad38-49fd-b65e-86f45e099abb.westus2.azmk8s.io -n aksattclus-aksdemo-c24839-686c6cd4 -a 10.0.3.4
-az network private-dns link vnet create -g Bastion -n MyDNSLinktoBastion -z 1392a07c-ad38-49fd-b65e-86f45e099abb.westus2.azmk8s.io -v BastionVMVNET -e true
-```
 
 
 
