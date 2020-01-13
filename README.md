@@ -50,7 +50,7 @@ az aks create -n <private-cluster-name> -g <resource-group-name> --load-balancer
 ################Retrieve AKS Resource ID######################
 aksresourceid=$(az aks show --name <private-cluster-name> --resource-group <resource-group-name> --query 'id' -o tsv)
 ################Retrieve the MC Resource Group################
-noderg=$(az aks show --name aksattcluswestus2 --resource-group aksdemo --query 'nodeResourceGroup' -o tsv) 
+noderg=$(az aks show --name <private-cluster-name>  --resource-group <resource-group-name> --query 'nodeResourceGroup' -o tsv) 
 az resource list --resource-group $noderg
 ##############Create subnet, disable private endpoint network policies, create private endpoint############
 az network vnet subnet create --name BastionPESubnet2 --resource-group Bastion --vnet-name BastionVMVNET --address-prefixes 10.0.4.0/24
