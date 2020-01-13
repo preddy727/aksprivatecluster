@@ -144,7 +144,10 @@ An ingress controller is a piece of software that provides reverse proxy, config
 
 https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 
-2) Create an ingress controller
+2) Create an ingress controller. 
+
+Create a file named internal-ingress.yaml using the following example manifest file. This example assigns 10.240.0.42 to the loadBalancerIP resource. Provide your own internal IP address for use with the ingress controller. Make sure that this IP address is not already in use within your virtual network.
+
 ```yaml
 controller:
   service:
