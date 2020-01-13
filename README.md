@@ -143,6 +143,17 @@ An ingress controller is a piece of software that provides reverse proxy, config
 1) Install applications with Helm in Azure Kubernetes Service (AKS)
 
 https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
+```powershell
+
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+help repo update
+helm install my-nginx-ingress stable/nginx-ingress \
+    --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
+    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
+    
+kubectl --namespace default get services -o wide -w my-nginx-ingress-controller
+
+```
 
 2) Create an ingress controller. 
 
