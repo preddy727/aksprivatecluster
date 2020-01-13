@@ -41,14 +41,14 @@ az group create --name <your rg name> --location <eastus2>
 #get kubernetes version 
 version=$(az aks get-versions -l <eastus2> --query 'orchestrators[-1].orchestratorVersion' -o tsv)
 ################Create Private Cluster########################
-az aks create -n <private-cluster-name> -g aksdemo --load-balancer-sku standard --enable-private-cluster --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <eastus2>
+az aks create -n <private-cluster-name> -g <resource-group-name> --load-balancer-sku standard --enable-private-cluster --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <eastus2>
 ```
 
 
 ### Create a Private endpoint in the Bastion VNET and link vnet to private-dns 
 ```powershell
 ################Retrieve AKS Resource ID######################
-aksresourceid=$(az aks show --name aksattcluswestus2 --resource-group aksdemo --query 'id' -o tsv)
+aksresourceid=$(az aks show --name <private-cluster-name> --resource-group <resource-group-name> --query 'id' -o tsv)
 ################Retrieve the MC Resource Group################
 noderg=$(az aks show --name aksattcluswestus2 --resource-group aksdemo --query 'nodeResourceGroup' -o tsv) 
 az resource list --resource-group $noderg
