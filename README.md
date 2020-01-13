@@ -136,4 +136,20 @@ vi azure-vote-all-in-one-redis.yaml
 kubectl apply -f azure-vote-all-in-one-redis.yaml
 kubectl get service azure-vote-front --watch
 ```
-   
+### Create an ingress controller to an internal virtual network in Azure Kubernetes Service (AKS)
+
+An ingress controller is a piece of software that provides reverse proxy, configurable traffic routing, and TLS termination for Kubernetes services. Kubernetes ingress resources are used to configure the ingress rules and routes for individual Kubernetes services. Using an ingress controller and ingress rules, a single IP address can be used to route traffic to multiple services in a Kubernetes cluster.
+
+1) Install applications with Helm in Azure Kubernetes Service (AKS)
+
+https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
+
+2) Create an ingress controller
+```yaml
+controller:
+  service:
+    loadBalancerIP: 10.240.0.42
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+ ```
+
