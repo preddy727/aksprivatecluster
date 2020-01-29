@@ -54,7 +54,7 @@ noderg=$(az aks show --name <private-cluster-name>  --resource-group <resource-g
 
 ##Note the Private DNS zone name and cluster A record" 
 az resource list --resource-group $noderg | grep "privateDnsZones"
-"id": "/subscriptions/c2483929-bdde-40b3-992e-66dd68f52928/resourceGroups/MC_aksdemo_aksatteastus2clus_eastus2/providers/Microsoft.Network/privateDnsZones/77cb2ebb-a082-43e7-a18e-0337bf24dfce.eastus2.azmk8s.io/virtualNetworkLinks/aksatteast-aksdemo-c24839-1e53cbe1"
+"id": "/subscriptions/<subid>/resourceGroups/<MC_rg>/providers/Microsoft.Network/privateDnsZones/77cb2ebb-a082-43e7-a18e-0337bf24dfce.eastus2.azmk8s.io/virtualNetworkLinks/aksatteast-aksdemo-c24839-1e53cbe1"
 
 ##############Create subnet, disable private endpoint network policies, create private endpoint############
 az network vnet subnet create --name BastionPESubnet2 --resource-group Bastion --vnet-name BastionVMVNET --address-prefixes 10.0.4.0/24
