@@ -9,7 +9,7 @@ Access ingress controller through private endpoint.
 The Azure CLI version 2.0.77 or later, and the Azure CLI AKS Preview extension version 0.4.18
 
 ### Architecture Diagram
-* Process flow ![alt text](https://github.com/preddy727/aksprivatecluster/blob/master/PLSAKS.png)
+* Process flow ![alt text](https://github.com/preddy727/aksprivatecluster/blob/master/Capture.png)
 
 ## Goals of the Lab
 1. Create a private AKS cluster.   
