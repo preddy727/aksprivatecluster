@@ -146,7 +146,7 @@ https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 ```powershell
 
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-help repo update
+helm repo update
 helm install my-nginx-ingress stable/nginx-ingress \
     --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
     --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
