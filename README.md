@@ -167,6 +167,11 @@ controller:
       service.beta.kubernetes.io/azure-load-balancer-internal: "true"
  ```
  
+ 3) Create a private link service to the load balancer for the ingress. 
+ 
+ 4) Create a private endpoint pointing at the resource id of the pls 
+ 
+ az network private-endpoint create --name PrivateingressEndpoint2 --resource-group Bastion --vnet-name BastionVMVNET --subnet BastionPESubnet2 --private-connection-resource-id <plsresourceid> --connection-name myingressConnection
 
 ```
 ### Daemonset deployment
