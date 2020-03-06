@@ -179,7 +179,7 @@ controller:
 --lb-frontend-ip-configs a5c35ed77e16a4aa0998e79dbdaef34a \
 --location eastus2 
 ```
-###Daemonset deployment
+### Daemonset deployment
 1-	Please go through this forked git repo to look at the code for the daemonset, configmap and docker file: https://github.com/naveedzaheer/AKSNodeInstaller 
 a.	Please review this article as well: https://medium.com/@patnaikshekhar/initialize-your-aks-nodes-with-daemonsets-679fa81fd20e 
 2-	Clone the repo on your machine and make changes to configmap as needed to use squid proxy: https://www.thegeekdiary.com/how-to-configure-docker-to-use-proxy/ 
@@ -200,7 +200,7 @@ c.	You can also build your image by using the Dockerfile in the repo: https://gi
 8-	You can use SSH to get to the AKS node to see the change made by daemonset after it is deployed https://docs.microsoft.com/en-us/azure/aks/ssh 
 
 
-###Azure DevOps 
+### Azure DevOps 
 
  
 
