@@ -167,17 +167,7 @@ controller:
       service.beta.kubernetes.io/azure-load-balancer-internal: "true"
  ```
  
- 3) Create a private endpoint to the ingress controller 
- 
- ```powershell 
- az network private-link-service create \
---resource-group mc_aksdemo_aksattcluswestus2_westus2 \
---name Ingresscontroller2 \
---vnet-name aks-vnet-18596564 \
---subnet aksplssubnet \
---lb-name kubernetes-internal \
---lb-frontend-ip-configs a5c35ed77e16a4aa0998e79dbdaef34a \
---location eastus2 
+
 ```
 ### Daemonset deployment
 1)	Please go through this forked git repo to look at the code for the daemonset, configmap and docker file: https://github.com/naveedzaheer/AKSNodeInstaller 
