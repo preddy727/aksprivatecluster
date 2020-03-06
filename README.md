@@ -195,8 +195,11 @@ b.	Add all RFC 1918 and ACR addresses to no_proxy.  For reference on using wildc
 "NO_PROXY=localhost,127.0.0.1,*.azurecr.io,gcr.io,mcr.microsoft.com,windows.net,10.*,172.16.*,172.31.*,192.168.*"
 
 c.	You can also build your image by using the Dockerfile in the repo: https://github.com/naveedzaheer/AKSNodeInstaller. You can then push the image to ACR
+
 6)	Change the daemonset yaml file to update the name and location of the node-installer docker image. It should be your ACR and the image that you just uploaded there.  
+
 7)	Deploy the daemonset to the cluster. 
+
 8)	You can use SSH to get to the AKS node to see the change made by daemonset after it is deployed https://docs.microsoft.com/en-us/azure/aks/ssh 
 
 
@@ -205,13 +208,13 @@ c.	You can also build your image by using the Dockerfile in the repo: https://gi
  
 
  
-Prerequisites
-•	A GitHub account, where you can create a repository. If you don't have one, you can create one for free.
-•	An Azure DevOps organization. If you don't have one, you can create one for free. (An Azure DevOps organization is different from your GitHub organization. Give them the same name if you want alignment between them.)
+## Prerequisites
+1)	A GitHub account, where you can create a repository. If you don't have one, you can create one for free.
+2) 	An Azure DevOps organization. If you don't have one, you can create one for free. (An Azure DevOps organization is different from your GitHub organization. Give them the same name if you want alignment between them.)
 If your team already has one, then make sure you're an administrator of the Azure DevOps project that you want to use.
-•	Allow the AKS Vnet and the jump server vnet access to Azure Container registry. Restrict access to an Azure container registry using an Azure virtual network or firewall rules
-•	To run your jobs, you'll need at least one agent. A Linux agent can build and deploy different kinds of apps, including Java and Android apps. We support Ubuntu, Red Hat, and CentOS. Self-hosted Linux agents
-Step by Step Guides
+3)	Allow the AKS Vnet and the jump server vnet access to Azure Container registry. Restrict access to an Azure container registry using an Azure virtual network or firewall rules
+4) 	To run your jobs, you'll need at least one agent. A Linux agent can build and deploy different kinds of apps, including Java and Android apps. We support Ubuntu, Red Hat, and CentOS. Self-hosted Linux agents
+5) Step by Step Guides
 •	Build Images
 •	Push Images
 •	Deploy Manifests
