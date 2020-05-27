@@ -63,7 +63,30 @@ az role assignment create --assignee <appId> --scope $VNET_ID --role Contributor
 #Azure CNI - that same basic /24 subnet range could only support a maximum of 8 nodes in the cluster
 #This node count could only support up to 240 pods (with a default maximum of 30 pods per node with Azure CNI)
 
-az aks create -n <private-cluster-name> -g <resource-group-name> --load-balancer-sku standard --enable-private-cluster --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <eastus2> --node-zones {1,2,3} --network-plugin kubenet --service-cidr 10.0.0.0/16 --dns-service-ip 10.0.0.10 --pod-cidr 10.244.0.0/16 --docker-bridge-address 172.17.0.1/16--vnet-subnet-id <$SUBNET_ID> --node-count 1 --vm-set-type VirtualMachineScaleSets --load-balancer-sku standard --enable-cluster-autoscaler --min-count 1 --max-count 3 --enable-cluster-autoscaler --cluster-autoscaler-profile scan-interval=30s
+az aks create \
+	-n <private-cluster-name> \
+	-g <resource-group-name> \
+	--load-balancer-sku standard \
+	--enable-private-cluster \
+	--enable-addons monitoring \
+	--kubernetes-version $version \
+	--generate-ssh-keys \
+	--location <eastus2> \
+	--node-zones {1,2,3} \
+	--network-plugin kubenet \
+	--service-cidr 10.0.0.0/16 \
+	--dns-service-ip 10.0.0.10 \
+	--pod-cidr 10.244.0.0/16 \
+	--docker-bridge-address 172.17.0.1/16 \
+	--vnet-subnet-id <$SUBNET_ID> \
+	--node-count 1 \
+	--vm-set-type VirtualMachineScaleSets \
+	--load-balancer-sku standard \
+	--enable-cluster-autoscaler \
+	--min-count 1 \
+	--max-count 3 \
+	--enable-cluster-autoscaler \
+	--cluster-autoscaler-profile scan-interval=30s \
 ```
 ### Create a Private endpoint in the Bastion VNET and link vnet to private-dns 
 ```powershell
