@@ -41,10 +41,8 @@ az group create --name <your rg name> --location <eastus2>
 #get kubernetes version 
 version=$(az aks get-versions -l <eastus2> --query 'orchestrators[-1].orchestratorVersion' -o tsv)
 ################Create a zone redundant Private Cluster in eastus2 or westus2########################
-az aks create -n <private-cluster-name> -g <resource-group-name> --load-balancer-sku standard --enable-private-cluster --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <eastus2> --node-zones {1,2,3}
+az aks create -n <private-cluster-name> -g <resource-group-name> --load-balancer-sku standard --enable-private-cluster --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <eastus2> --node-zones {1,2,3} --vnet-subnet-id <subnet_id> --dns-service-ip <dnsserviceip> --service-cidr <10.0.20.0/24>
 ```
-
-
 ### Create a Private endpoint in the Bastion VNET and link vnet to private-dns 
 ```powershell
 ################Retrieve AKS Resource ID######################
