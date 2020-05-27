@@ -40,8 +40,30 @@ az group create --name <your rg name> --location <eastus2>
 
 #get kubernetes version 
 version=$(az aks get-versions -l <eastus2> --query 'orchestrators[-1].orchestratorVersion' -o tsv)
-################Create a zone redundant Private Cluster in eastus2 or westus2########################
-az aks create -n <private-cluster-name> -g <resource-group-name> --load-balancer-sku standard --enable-private-cluster --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <eastus2> --node-zones {1,2,3} --vnet-subnet-id <subnet_id> --dns-service-ip <dnsserviceip> --service-cidr <10.0.20.0/24>
+
+#Create a vnet and subnet 
+az network vnet create \
+    --resource-group myResourceGroup \
+    --name myAKSVnet \
+    --address-prefixes 192.168.0.0/16 \
+    --subnet-name myAKSSubnet \
+    --subnet-prefix 192.168.1.0/24
+    
+#Create a service principal and assign permissions 
+az ad sp create-for-rbac --skip-assignment
+#Retrieve the resource ids of vnet and subnet 
+VNET_ID=$(az network vnet show --resource-group myResourceGroup --name myAKSVnet --query id -o tsv)
+SUBNET_ID=$(az network vnet subnet show --resource-group myResourceGroup --vnet-name myAKSVnet --name myAKSSubnet --query id -o tsv)
+#Assign the service principal for your AKS cluster Contributor permissions on the virtual network
+az role assignment create --assignee <appId> --scope $VNET_ID --role Contributor
+
+################Create a zone redundant Private Cluster in eastus2 or westus2 using kubenet and autoscaler########################
+#kubenet - a simple /24 IP address range can support up to 251 nodes in the cluster (each Azure virtual network subnet reserves the #first three IP addresses for management operations)
+#This node count could support up to 27,610 pods (with a default maximum of 110 pods per node with kubenet)
+#Azure CNI - that same basic /24 subnet range could only support a maximum of 8 nodes in the cluster
+#This node count could only support up to 240 pods (with a default maximum of 30 pods per node with Azure CNI)
+
+az aks create -n <private-cluster-name> -g <resource-group-name> --load-balancer-sku standard --enable-private-cluster --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <eastus2> --node-zones {1,2,3} --network-plugin kubenet --service-cidr 10.0.0.0/16 --dns-service-ip 10.0.0.10 --pod-cidr 10.244.0.0/16 --docker-bridge-address 172.17.0.1/16--vnet-subnet-id <$SUBNET_ID> --node-count 1 --vm-set-type VirtualMachineScaleSets --load-balancer-sku standard --enable-cluster-autoscaler --min-count 1 --max-count 3 --enable-cluster-autoscaler --cluster-autoscaler-profile scan-interval=30s
 ```
 ### Create a Private endpoint in the Bastion VNET and link vnet to private-dns 
 ```powershell
