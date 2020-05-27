@@ -81,11 +81,9 @@ az aks create \
 	--vnet-subnet-id <$SUBNET_ID> \
 	--node-count 1 \
 	--vm-set-type VirtualMachineScaleSets \
-	--load-balancer-sku standard \
 	--enable-cluster-autoscaler \
 	--min-count 1 \
 	--max-count 3 \
-	--enable-cluster-autoscaler \
 	--cluster-autoscaler-profile scan-interval=30s \
 ```
 ### Create a Private endpoint in the Bastion VNET and link vnet to private-dns 
