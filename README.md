@@ -67,6 +67,7 @@ az aks create \
 	-n <private-cluster-name> \
 	-g <resource-group-name> \
 	--load-balancer-sku standard \
+	--enable-managed-identity
 	--enable-private-cluster \
 	--enable-addons monitoring \
 	--kubernetes-version $version \
