@@ -16,7 +16,7 @@ The Azure CLI version 2.2.0 or later or later
 
 ## Setup a private Azure Container registry and create a private AKS cluster
 ```powershell
-
+git clone https://github.com/preddy727/aksprivatecluster.git
 # Please provide your subscription id here
 export APP_SUBSCRIPTION_ID=c2483929-bdde-40b3-992e-66dd68f52928
 # Please provide your unique prefix to make sure that your resources are unique
