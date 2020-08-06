@@ -199,20 +199,6 @@ az acr build --image sample/hello-world:v1 \
 az acr run --registry $MYACR \
   --cmd '$Registry/sample/hello-world:v1' /dev/null
 
-git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
-cd azure-voting-app-redis
-sudo /usr/local/bin/docker-compose up -d
-sudo docker images
-sudo docker ps
-curl http://localhost:8080
-sudo /usr/local/bin/docker-composer down
-
-az acr list --resource-group $ADO_PE_DEMO_RG --query "[].{acrLoginServer:loginServer}" --output table
-sudo docker tag azure-vote-front attacr.azurecr.io/azure-vote-front:v1
-sudo docker push attacr.azurecr.io/azure-vote-front:v1
-az acr repository list --name $MYACR --output table
-
-
 #Create a service principal and assign permissions 
 
 SERVICE_PRINCIPAL_NAME=prreddy-acr-service-principal
@@ -285,7 +271,10 @@ noderg=$(az aks show --name $AKS_PRIVATE_CLUSTER  --resource-group $AKS_PE_DEMO_
 
 ##Note the Private DNS zone name and cluster A record" 
 az resource list --resource-group $noderg | grep "privateDnsZones"
-"id": "/subscriptions/<subid>/resourceGroups/<MC_rg>/providers/Microsoft.Network/privateDnsZones/77cb2ebb-a082-43e7-a18e-0337bf24dfce.eastus2.azmk8s.io/virtualNetworkLinks/aksatteast-aksdemo-c24839-1e53cbe1"
+"id": "/subscriptions/<subid>/resourceGroups/<MC_rg>/providers/Microsoft.Network/privateDnsZones/7381ebda-9a7b-46af-b067-797fe3655227.privatelink.eastus2.azmk8s.io/virtualNetworkLinks/aksatteast-aksdemo-c24839-1e53cbe1"
+
+export DNS_ZONE=7381ebda-9a7b-46af-b067-797fe3655227.privatelink.eastus2.azmk8s.io
+export DNS_ARECORD=aksatteast-aksdemo-c24839-1e53cbe1
 
 ##############Create subnet, disable private endpoint network policies, create private endpoint############
 
@@ -299,22 +288,22 @@ az network private-endpoint create --name PrivateKubeApiEndpoint2 --resource-gro
 ##Go to the portal and get the ip address of the private-endpoint#############
 
 ##Duplicate the Private DNS zone saved earlier from the MC resource group in the Baston resource group"
-az network private-dns zone create -g Bastion -n 77cb2ebb-a082-43e7-a18e-0337bf24dfce.eastus2.azmk8s.io
-az network private-dns record-set a add-record -g Bastion -z 77cb2ebb-a082-43e7-a18e-0337bf24dfce.eastus2.azmk8s.io -n aksatteast-aksdemo-c24839-1e53cbe1 -a 10.0.4.4
-az network private-dns link vnet create -g Bastion -n MyDNSLinktoBastion -z 77cb2ebb-a082-43e7-a18e-0337bf24dfce.eastus2.azmk8s.io -v BastionVMVNET -e true
+az network private-dns zone create -g $ADO_PE_DEMO_RG -n $DNS_ZONE
+az network private-dns record-set a add-record -g $ADO_PE_DEMO_RG  -z $DNS_ZONE -n $DNS_ARECORD  -a 10.0.1.4
+az network private-dns link vnet create -g $ADO_PE_DEMO_RG -n MyDNSLinktoBastion -z $DNS_ZONE -v $NETWORK_NAME -e true
 ```
 
 ## Validate connectivity to cluster
 ```powershell 
-Run the following from the Bastion VM that has access to the endpoint created in the Bastion Subnet. 
+Run the following from the ADO VM that has access to the endpoint created in the ADO Subnet. 
 
 Connect to the cluster
 To manage a Kubernetes cluster, you use kubectl, the Kubernetes command-line client. If you use Azure Cloud Shell, kubectl is already installed. To install kubectl locally, use the az aks install-cli command:
 Azure CLI 
-az aks install-cli
+sudo az aks install-cli
 To configure kubectl to connect to your Kubernetes cluster, use the az aks get-credentials command. This command downloads credentials and configures the Kubernetes CLI to use them.
 Azure CLI  
-az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
+az aks get-credentials --resource-group $AKS_PE_DEMO_RG --name $AKS_PRIVATE_CLUSTER
 To verify the connection to your cluster, use the kubectl get command to return a list of the cluster nodes.
 Azure CLI 
 kubectl get nodes
@@ -323,52 +312,41 @@ The following example output shows the single node created in the previous steps
 	aks-nodepool1-31718369-0   Ready    agent   6m44s   v1.12.8
 ```
 
-## Access the cluster dashboard
-```powershell
-kubectl create clusterrolebinding kubernetes-dashboard -n kube-system --clusterrole=cluster-admin --serviceaccount=kube-system:kubernetes-dashboard
-az aks browse --resource-group <your rg name> --name <your aks name>
-```
-
-
-
-
-### Setup ACR
+### Docker Compose and push to ACR
 ```powershell
 git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
 cd azure-voting-app-redis
-sudo /usr/local/bin/docker-compose up -d
+sudo apt install docker-compose 
+sudo /usr/bin/docker-compose up -d
 sudo docker images
 sudo docker ps
 curl http://localhost:8080
-sudo /usr/local/bin/docker-composer down
+sudo /usr/bin/docker-compose down
 
-az acr create --resource-group aksdemo --name attacr --sku Premium --location westus
-sudo az acr login --name attacr
-az acr list --resource-group aksdemo --query "[].{acrLoginServer:loginServer}" --output table
-sudo docker tag azure-vote-front attacr.azurecr.io/azure-vote-front:v1
-sudo docker push attacr.azurecr.io/azure-vote-front:v1
-az acr repository list --name attacr --output table
+sudo az acr login --name $MYACR
+az acr list --resource-group $AKS_PE_DEMO_RG --query "[].{acrLoginServer:loginServer}" --output table
+sudo docker tag azure-vote-front preastus2mycontainerregistry.azurecr.io/azure-vote-front:v1
+sudo docker push preastus2mycontainerregistry.azurecr.io/azure-vote-front:v1
+az acr repository list --name $MYACR --output table
 ```
 ### Deploy application
 ```powershell
-az acr create --resource-group aksdemo --name attacr --sku Standard --location westus 
-AKS_RESOURCE_GROUP="aksdemo"
-ACR_RESOURCE_GROUP="aksdemo"
-AKS_CLUSTER_NAME="aksattcluswestus2"
-Create Service endpoint from Bastion to ACR 
-ACR_NAME="attacr"
  # Get the id of the service principal configured for AKS
- CLIENT_ID=$(az aks show --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME --query "servicePrincipalProfile.clientId" --output tsv)
+ CLIENT_ID=$(az aks show --resource-group $AKS_PE_DEMO_RG --name $AKS_PRIVATE_CLUSTER --query "servicePrincipalProfile.clientId" --output tsv)
 
  # Get the ACR registry resource id
- ACR_ID=$(az acr show --name $ACR_NAME --resource-group $ACR_RESOURCE_GROUP --query "id" --output tsv)
-
-# Create role assignment
-az role assignment create --assignee $CLIENT_ID --role acrpull --scope $ACR_ID
-az aks update -n aksattcluswestus2 -g aksdemo --attach-acr attacr
+ ACR_ID=$(az acr show --name $MYACR --resource-group $AKS_PE_DEMO_RG --query "id" --output tsv)
 
 #Deploy the application
 vi azure-vote-all-in-one-redis.yaml
+
+##############
+containers:
+- name: azure-vote-front
+  image: preastus2mycontainerregistry.azurecr.io/azure-vote-front:v1
+###############
+
+
 kubectl apply -f azure-vote-all-in-one-redis.yaml
 kubectl get service azure-vote-front --watch
 ```
@@ -455,3 +433,4 @@ o	Canary Deployment Strategy is most common
 	https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/kubernetes/canary-demo?view=azure-devops
 
 •	Build and Deploy to Azure Kubernetes Service 
+
