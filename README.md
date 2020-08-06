@@ -23,6 +23,7 @@ export APP_SUBSCRIPTION_ID=c2483929-bdde-40b3-992e-66dd68f52928
 export APP_PREFIX=preastus2
 # Please provide your region
 export LOCATION=EastUS2
+export REGISTRY_LOCATION=EastUS2
 
 export VNET_PREFIX="192.168."
 
@@ -154,7 +155,49 @@ az network private-dns record-set a create \
   --name ${MYACR}.${REGISTRY_LOCATION}.data \
   --zone-name privatelink.azurecr.io \
   --resource-group $ADO_PE_DEMO_RG
- 
+  
+ az network private-dns record-set a add-record \
+  --record-set-name $MYACR \
+  --zone-name privatelink.azurecr.io \
+  --resource-group $ADO_PE_DEMO_RG \
+  --ipv4-address $PRIVATE_IP
+
+# Specify registry region in data endpoint name
+az network private-dns record-set a add-record \
+  --record-set-name ${MYACR}.${REGISTRY_LOCATION}.data \
+  --zone-name privatelink.azurecr.io \
+  --resource-group $ADO_PE_DEMO_RG \
+  --ipv4-address $DATA_ENDPOINT_PRIVATE_IP
+  
+#Validate private link connection
+nslookup $MYACR.azurecr.io
+
+#Private ip nslookup
+[...]
+myregistry.azurecr.io       canonical name = myregistry.privatelink.azurecr.io.
+Name:   myregistry.privatelink.azurecr.io
+Address: 10.0.0.6
+
+#Public ip nslookup 
+nskookup $MYACR.eastus2.cloudapp.azure.com
+[...]
+Non-authoritative answer:
+Name:   myregistry.easuts2.cloudapp.azure.com
+Address: 40.78.103.41
+
+#Registry operations
+az acr login --name $MYACR
+echo FROM hello-world > Dockerfile
+az acr build --image sample/hello-world:v1 \
+  --registry $MYACR \
+  --file Dockerfile .
+  
+az acr run --registry $MYACR \
+  --cmd '$Registry/sample/hello-world:v1' /dev/null
+
+docker pull myregistry.azurecr.io/hello-world:v1
+
+
 #Create a service principal and assign permissions 
 az ad sp create-for-rbac --skip-assignment
 #Retrieve the resource ids of vnet and subnet 
