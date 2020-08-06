@@ -372,14 +372,19 @@ controller:
 https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 ```powershell
 
+# Create a namespace for your ingress resources
+kubectl create namespace ingress-basic
+
+# Add the official stable repository
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-helm repo update
-helm install my-nginx-ingress stable/nginx-ingress \
+
+# Use Helm to deploy an NGINX ingress controller
+helm install nginx-ingress stable/nginx-ingress \
+    --namespace ingress-basic \
+    -f internal-ingress.yaml \
+    --set controller.replicaCount=2 \
     --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
     --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
-    
-kubectl --namespace default get services -o wide -w my-nginx-ingress-controller
-
 ```
  3) Create a private link service to the load balancer for the ingress. 
  
