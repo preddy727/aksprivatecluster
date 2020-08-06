@@ -40,7 +40,7 @@ export DEMO_VNET_CIDR=$VNET_PREFIX"0.0/16"
 export DEMO_VNET_APP_SUBNET=app_subnet
 export DEMO_VNET_APP_SUBNET_CIDR=$VNET_PREFIX"1.0/24"
 export AKS_PE_SUBNET=aks_pe_subnet
-export AKS_PE_SUBNET_CIDR="10.4.0.0/24"
+export AKS_PE_SUBNET_CIDR="10.0.1.0/24"
 
 # set this to the name of your Azure Container Registry.  It must be globally unique
 export MYACR=$APP_PREFIX"myContainerRegistry"
