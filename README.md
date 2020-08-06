@@ -16,23 +16,50 @@ The Azure CLI version 2.2.0 or later or later
 
 ## Create a private AKS cluster
 ```powershell
+
+# Please provide your subscription id here
+export APP_SUBSCRIPTION_ID=c2483929-bdde-40b3-992e-66dd68f52928
+# Please provide your unique prefix to make sure that your resources are unique
+export APP_PREFIX=preastus2
+# Please provide your region
+export LOCATION=EastUS2
+
+export VNET_PREFIX="192.168."
+
+export AKS_PE_DEMO_RG=$APP_PREFIX"-aksdemo-rg"
+export DEMO_VNET=$APP_PREFIX"-aksdemo-vnet"
+export DEMO_VNET_CIDR=$VNET_PREFIX"0.0/16"
+export DEMO_VNET_APP_SUBNET=app_subnet
+export DEMO_VNET_APP_SUBNET_CIDR=$VNET_PREFIX"1.0/24"
+
+# set this to the name of your Azure Container Registry.  It must be globally unique
+export MYACR=$APP_PREFIX"myContainerRegistry"
+
+
+
+
 az login
-az account set --subscription <your subscription name>
+az account set --subscription $APP_SUBSCRIPTION_ID
 
 #create resource group
-az group create --name <your rg name> --location <eastus2>
+az group create --name $APP_PE_DEMO_RG --location $LOCATION
 
 #get kubernetes version 
-version=$(az aks get-versions -l <eastus2> --query 'orchestrators[-1].orchestratorVersion' -o tsv)
+version=$(az aks get-versions -l $LOCATION --query 'orchestrators[-1].orchestratorVersion' -o tsv)
 
 #Create a vnet and subnet 
 az network vnet create \
-    --resource-group myResourceGroup \
-    --name myAKSVnet \
-    --address-prefixes 192.168.0.0/16 \
-    --subnet-name myAKSSubnet \
-    --subnet-prefix 192.168.1.0/24
+    --resource-group $AKS_PE_DEMO_RG \
+    --name $DEMO_VNET \
+    --address-prefixes $DEMO_VNET_CIDR \
+    --subnet-name $DEMO_VNET_APP_SUBNET \
+    --subnet-prefix $DEMO_VNET_APP_SUBNET_CIDR
     
+    
+# Run the following line to create an Azure Container Registry if you do not already have one
+az acr create -n $MYACR -g $AKS_PE_DEMO_RG --sku basic
+
+ 
 #Create a service principal and assign permissions 
 az ad sp create-for-rbac --skip-assignment
 #Retrieve the resource ids of vnet and subnet 
@@ -70,6 +97,7 @@ az aks create \
 	--min-count 1 \
 	--max-count 3 \
 	--cluster-autoscaler-profile scan-interval=30s \
+	--attach-acr $MYACR
 ```
 ### Create a Private endpoint in the Bastion VNET and link vnet to private-dns 
 ```powershell
