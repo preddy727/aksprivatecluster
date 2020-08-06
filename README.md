@@ -366,7 +366,7 @@ Create a file named internal-ingress.yaml using the following example manifest f
 ```yaml
 controller:
   service:
-    loadBalancerIP: 10.240.0.42
+    loadBalancerIP: 192.168.1.42
     annotations:
       service.beta.kubernetes.io/azure-load-balancer-internal: "true"
  ```
