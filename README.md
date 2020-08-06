@@ -27,6 +27,7 @@ export LOCATION=EastUS2
 export VNET_PREFIX="192.168."
 
 export AKS_PE_DEMO_RG=$APP_PREFIX"-aksdemo-rg"
+export ADO_PE_DEMO_RG=$APP_PREFIX"-adodemo-rg"
 export DEMO_VNET=$APP_PREFIX"-aksdemo-vnet"
 export DEMO_VNET_CIDR=$VNET_PREFIX"0.0/16"
 export DEMO_VNET_APP_SUBNET=app_subnet
@@ -42,7 +43,8 @@ az login
 az account set --subscription $APP_SUBSCRIPTION_ID
 
 #create resource group
-az group create --name $APP_PE_DEMO_RG --location $LOCATION
+az group create --name $AKS_PE_DEMO_RG --location $LOCATION
+az group create --name $ADO_PE_DEMO_RG --location $LOCATION
 
 #get kubernetes version 
 version=$(az aks get-versions -l $LOCATION --query 'orchestrators[-1].orchestratorVersion' -o tsv)
@@ -61,7 +63,7 @@ az acr create -n $MYACR -g $AKS_PE_DEMO_RG --sku basic
 
 #deploy a default Ubuntu Azure virtual machine with
 az vm create \
-  --resource-group $AKS_PE_DEMO_RG \
+  --resource-group $ADO_PE_DEMO_RG \
   --name $VM_NAME \
   --image UbuntuLTS \
   --admin-username azureuser \
@@ -79,15 +81,79 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
 #Get network and subnet names
 NETWORK_NAME=$(az network vnet list \
-  --resource-group $AKS_PE_DEMO_RG \
+  --resource-group $ADO_PE_DEMO_RG \
   --query '[].{Name: name}' --output tsv)
 
 SUBNET_NAME=$(az network vnet list \
-  --resource-group $AKS_PE_DEMO_RG \
+  --resource-group $ADO_PE_DEMO_RG \
   --query '[].{Subnet: subnets[0].name}' --output tsv)
 
 echo NETWORK_NAME=$NETWORK_NAME
 echo SUBNET_NAME=$SUBNET_NAME
+
+#Disable Network policies in subnet
+az network vnet subnet update \
+ --name $SUBNET_NAME \
+ --vnet-name $NETWORK_NAME \
+ --resource-group $ADO_PE_DEMO_RG \
+ --disable-private-endpoint-network-policies
+ 
+ #Configure Private DNS zone 
+ az network private-dns zone create \
+  --resource-group $ADO_PE_DEMO_RG \
+  --name "privatelink.azurecr.io"
+  
+ #Create an association link
+ az network private-dns link vnet create \
+  --resource-group $ADO_PE_DEMO_RG \
+  --zone-name "privatelink.azurecr.io" \
+  --name MyDNSLink \
+  --virtual-network $NETWORK_NAME \
+  --registration-enabled false
+  
+ #Create a private registry endpoint
+ REGISTRY_ID=$(az acr show --name $MYACR \
+  --query 'id' --output tsv)
+  
+ az network private-endpoint create \
+    --name myPrivateEndpoint \
+    --resource-group $ADO_PE_DEMO_RG \
+    --vnet-name $NETWORK_NAME \
+    --subnet $SUBNET_NAME \
+    --private-connection-resource-id $REGISTRY_ID \
+    --group-ids registry \
+    --connection-name myConnection
+    
+ #Get private ip addresses
+ NETWORK_INTERFACE_ID=$(az network private-endpoint show \
+  --name myPrivateEndpoint \
+  --resource-group $ADO_PE_DEMO_RG \
+  --query 'networkInterfaces[0].id' \
+  --output tsv)
+  
+ PRIVATE_IP=$(az resource show \
+  --ids $NETWORK_INTERFACE_ID \
+  --api-version 2019-04-01 \
+  --query 'properties.ipConfigurations[1].properties.privateIPAddress' \
+  --output tsv)
+
+DATA_ENDPOINT_PRIVATE_IP=$(az resource show \
+  --ids $NETWORK_INTERFACE_ID \
+  --api-version 2019-04-01 \
+  --query 'properties.ipConfigurations[0].properties.privateIPAddress' \
+  --output tsv)
+  
+ #Create DNS records
+ az network private-dns record-set a create \
+  --name $MYACR \
+  --zone-name privatelink.azurecr.io \
+  --resource-group $ADO_PE_DEMO_RG
+
+# Specify registry region in data endpoint name
+az network private-dns record-set a create \
+  --name ${MYACR}.${REGISTRY_LOCATION}.data \
+  --zone-name privatelink.azurecr.io \
+  --resource-group $ADO_PE_DEMO_RG
  
 #Create a service principal and assign permissions 
 az ad sp create-for-rbac --skip-assignment
