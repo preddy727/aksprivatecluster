@@ -20,6 +20,11 @@ git clone https://github.com/preddy727/aksprivatecluster.git
 # Please provide your subscription id here
 export APP_SUBSCRIPTION_ID=c2483929-bdde-40b3-992e-66dd68f52928
 # Please provide your unique prefix to make sure that your resources are unique
+
+
+# Please provide your subscription id here
+export APP_SUBSCRIPTION_ID=c2483929-bdde-40b3-992e-66dd68f52928
+# Please provide your unique prefix to make sure that your resources are unique
 export APP_PREFIX=preastus2
 # Please provide your region
 export LOCATION=EastUS2
@@ -34,11 +39,12 @@ export DEMO_VNET=$APP_PREFIX"-aksdemo-vnet"
 export DEMO_VNET_CIDR=$VNET_PREFIX"0.0/16"
 export DEMO_VNET_APP_SUBNET=app_subnet
 export DEMO_VNET_APP_SUBNET_CIDR=$VNET_PREFIX"1.0/24"
+export AKS_PE_SUBNET=aks_pe_subnet
+export AKS_PE_SUBNET_CIDR="10.4.0.0/24"
 
 # set this to the name of your Azure Container Registry.  It must be globally unique
 export MYACR=$APP_PREFIX"myContainerRegistry"
 export VM_NAME=myDockerVM
-
 
 
 az login
@@ -48,8 +54,7 @@ az account set --subscription $APP_SUBSCRIPTION_ID
 az group create --name $AKS_PE_DEMO_RG --location $LOCATION
 az group create --name $ADO_PE_DEMO_RG --location $LOCATION
 
-#get kubernetes version 
-version=$(az aks get-versions -l $LOCATION --query 'orchestrators[-1].orchestratorVersion' -o tsv)
+
 
 #Create a vnet and subnet 
 az network vnet create \
@@ -61,7 +66,7 @@ az network vnet create \
     
     
 # Run the following line to create an Azure Container Registry if you do not already have one
-az acr create -n $MYACR -g $AKS_PE_DEMO_RG --sku basic
+az acr create -n $MYACR -g $AKS_PE_DEMO_RG --sku premium
 
 #deploy a default Ubuntu Azure virtual machine with
 az vm create \
@@ -82,6 +87,11 @@ This message shows that your installation appears to be working correctly.
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
 #Get network and subnet names
+
+
+#Disable Network policies in subnet
+az login
+
 NETWORK_NAME=$(az network vnet list \
   --resource-group $ADO_PE_DEMO_RG \
   --query '[].{Name: name}' --output tsv)
@@ -93,7 +103,6 @@ SUBNET_NAME=$(az network vnet list \
 echo NETWORK_NAME=$NETWORK_NAME
 echo SUBNET_NAME=$SUBNET_NAME
 
-#Disable Network policies in subnet
 az network vnet subnet update \
  --name $SUBNET_NAME \
  --vnet-name $NETWORK_NAME \
@@ -179,15 +188,9 @@ myregistry.azurecr.io       canonical name = myregistry.privatelink.azurecr.io.
 Name:   myregistry.privatelink.azurecr.io
 Address: 10.0.0.6
 
-#Public ip nslookup 
-nskookup $MYACR.eastus2.cloudapp.azure.com
-[...]
-Non-authoritative answer:
-Name:   myregistry.easuts2.cloudapp.azure.com
-Address: 40.78.103.41
 
 #Registry operations
-az acr login --name $MYACR
+sudo az acr login --name $MYACR
 echo FROM hello-world > Dockerfile
 az acr build --image sample/hello-world:v1 \
   --registry $MYACR \
@@ -196,12 +199,23 @@ az acr build --image sample/hello-world:v1 \
 az acr run --registry $MYACR \
   --cmd '$Registry/sample/hello-world:v1' /dev/null
 
-docker pull myregistry.azurecr.io/hello-world:v1
+git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
+cd azure-voting-app-redis
+sudo /usr/local/bin/docker-compose up -d
+sudo docker images
+sudo docker ps
+curl http://localhost:8080
+sudo /usr/local/bin/docker-composer down
+
+az acr list --resource-group $ADO_PE_DEMO_RG --query "[].{acrLoginServer:loginServer}" --output table
+sudo docker tag azure-vote-front attacr.azurecr.io/azure-vote-front:v1
+sudo docker push attacr.azurecr.io/azure-vote-front:v1
+az acr repository list --name $MYACR --output table
 
 
 #Create a service principal and assign permissions 
 
-SERVICE_PRINCIPAL_NAME=acr-service-principal
+SERVICE_PRINCIPAL_NAME=prreddy-acr-service-principal
 
 # Obtain the full registry ID for subsequent command args
 ACR_REGISTRY_ID=$(az acr show --name $MYACR --query id --output tsv)
@@ -226,8 +240,16 @@ echo "Service principal password: $SP_PASSWD"
 #Azure CNI - that same basic /24 subnet range could only support a maximum of 8 nodes in the cluster
 #This node count could only support up to 240 pods (with a default maximum of 30 pods per node with Azure CNI)
 
-VNET_ID=$(az network vnet show --resource-group myResourceGroup --name myAKSVnet --query id -o tsv)
-SUBNET_ID=$(az network vnet subnet show --resource-group $AKS_PE_DEMO_RG --vnet-name DEMO_VNET --name DEMO_VNET_APP_SUBNET --query id -o tsv)
+VNET_ID=$(az network vnet show --resource-group $AKS_PE_DEMO_RG --name $DEMO_VNET --query id -o tsv)
+SUBNET_ID=$(az network vnet subnet show --resource-group $AKS_PE_DEMO_RG --vnet-name $DEMO_VNET --name $DEMO_VNET_APP_SUBNET --query id -o tsv)
+
+#get kubernetes version 
+version=$(az aks get-versions -l $LOCATION --query 'orchestrators[-1].orchestratorVersion' -o tsv)
+# Install the aks-preview extension
+az extension add --name aks-preview
+
+# Update the extension to make sure you have the latest version installed
+az extension update --name aks-preview
 
 az aks create \
 	-n $AKS_PRIVATE_CLUSTER \
@@ -239,7 +261,7 @@ az aks create \
 	--kubernetes-version $version \
 	--generate-ssh-keys \
 	--location $LOCATION \
-	--node-zones {1,2,3} \
+	--zones {1,2,3} \
 	--network-plugin kubenet \
 	--service-cidr 10.0.0.0/16 \
 	--dns-service-ip 10.0.0.10 \
@@ -254,21 +276,26 @@ az aks create \
 	--cluster-autoscaler-profile scan-interval=30s \
 	--attach-acr $MYACR
 ```
-### Create a Private endpoint in the Bastion VNET and link vnet to private-dns 
+### Create a Private endpoint in the ADO VNET and link vnet to private-dns 
 ```powershell
 ################Retrieve AKS Resource ID######################
-aksresourceid=$(az aks show --name <private-cluster-name> --resource-group <resource-group-name> --query 'id' -o tsv)
+aksresourceid=$(az aks show --name $AKS_PRIVATE_CLUSTER --resource-group $AKS_PE_DEMO_RG --query 'id' -o tsv)
 ################Retrieve the MC Resource Group and associated private DNS zone################
-noderg=$(az aks show --name <private-cluster-name>  --resource-group <resource-group-name> --query 'nodeResourceGroup' -o tsv) 
+noderg=$(az aks show --name $AKS_PRIVATE_CLUSTER  --resource-group $AKS_PE_DEMO_RG --query 'nodeResourceGroup' -o tsv) 
 
 ##Note the Private DNS zone name and cluster A record" 
 az resource list --resource-group $noderg | grep "privateDnsZones"
 "id": "/subscriptions/<subid>/resourceGroups/<MC_rg>/providers/Microsoft.Network/privateDnsZones/77cb2ebb-a082-43e7-a18e-0337bf24dfce.eastus2.azmk8s.io/virtualNetworkLinks/aksatteast-aksdemo-c24839-1e53cbe1"
 
 ##############Create subnet, disable private endpoint network policies, create private endpoint############
-az network vnet subnet create --name BastionPESubnet2 --resource-group Bastion --vnet-name BastionVMVNET --address-prefixes 10.0.4.0/24
-az network vnet subnet update --name BastionPESubnet2 --resource-group Bastion --vnet-name BastionVMVNET --disable-private-endpoint-network-policies true
-az network private-endpoint create --name PrivateKubeApiEndpoint2 --resource-group Bastion --vnet-name BastionVMVNET --subnet BastionPESubnet2 --private-connection-resource-id $aksresourceid --group-ids management --connection-name myKubeConnection
+
+NETWORK_NAME=$(az network vnet list \
+  --resource-group $ADO_PE_DEMO_RG \
+  --query '[].{Name: name}' --output tsv)
+
+az network vnet subnet create --name $AKS_PE_SUBNET --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --address-prefixes $AKS_PE_SUBNET_CIDR
+az network vnet subnet update --name $AKS_PE_SUBNET --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --disable-private-endpoint-network-policies true
+az network private-endpoint create --name PrivateKubeApiEndpoint2 --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --subnet $AKS_PE_SUBNET --private-connection-resource-id $aksresourceid --group-ids management --connection-name myKubeConnection
 ##Go to the portal and get the ip address of the private-endpoint#############
 
 ##Duplicate the Private DNS zone saved earlier from the MC resource group in the Baston resource group"
@@ -428,6 +455,3 @@ o	Canary Deployment Strategy is most common
 	https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/kubernetes/canary-demo?view=azure-devops
 
 •	Build and Deploy to Azure Kubernetes Service 
-
-
-
