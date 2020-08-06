@@ -375,6 +375,9 @@ https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 # Create a namespace for your ingress resources
 kubectl create namespace ingress-basic
 
+#Install Helm 
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
 # Add the official stable repository
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 
