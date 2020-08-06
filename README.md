@@ -6,29 +6,13 @@ Deploy ACR with a service endpoint.
 Access ingress controller through private endpoint. 
 
 ## Pre-requisites 
-The Azure CLI version 2.0.77 or later, and the Azure CLI AKS Preview extension version 0.4.18
+The Azure CLI version 2.2.0 or later or later
 
 ### Architecture Diagram
 * Process flow ![alt text](https://github.com/preddy727/aksprivatecluster/blob/master/architecture%20(1).png)
 
 ## Goals of the Lab
 1. Create a private AKS cluster.   
-
-# Install the aks-preview extension
-```powershell
-az extension add --name aks-preview
-
-# Update the extension to make sure you have the latest version installed
-
-az extension update --name aks-preview
-
-az feature register --name AKSPrivateLinkPreview --namespace Microsoft.ContainerService
-az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/AKSPrivateLinkPreview')].{Name:name,State:properties.state}"
-
-az provider register --namespace Microsoft.ContainerService
-az provider register --namespace Microsoft.Network
-```
-
 
 ## Create a private AKS cluster
 ```powershell
