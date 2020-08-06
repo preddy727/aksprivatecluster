@@ -261,6 +261,10 @@ az aks create \
 	--max-count 3 \
 	--cluster-autoscaler-profile scan-interval=30s \
 	--attach-acr $MYACR
+
+az aks show -g $AKS_PE_DEMO_RG -n $AKS_PRIVATE_CLUSTER --query "identity"
+
+az role assignment create --assignee e1ee711d-0153-4dc3-972b-bf03c0b5430d --scope /subscriptions/c2483929-bdde-40b3-992e-66dd68f52928/resourceGroups/preastus2-aksdemo-rg/providers/Microsoft.Network/virtualNetworks/preastus2-aksdemo-vnet/subnets/app_subnet --role "Contributor"
 ```
 ### Create a Private endpoint in the ADO VNET and link vnet to private-dns 
 ```powershell
