@@ -14,7 +14,7 @@ The Azure CLI version 2.2.0 or later or later
 ## Goals of the Lab
 1. Create a private AKS cluster.   
 
-## Create a private AKS cluster
+## Setup a private Azure Container registry and create a private AKS cluster
 ```powershell
 
 # Please provide your subscription id here
