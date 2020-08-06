@@ -28,6 +28,7 @@ export REGISTRY_LOCATION=EastUS2
 export VNET_PREFIX="192.168."
 
 export AKS_PE_DEMO_RG=$APP_PREFIX"-aksdemo-rg"
+export AKS_PRIVATE_CLUSTER=$APP_PREFIX"-aksdemo-aks"
 export ADO_PE_DEMO_RG=$APP_PREFIX"-adodemo-rg"
 export DEMO_VNET=$APP_PREFIX"-aksdemo-vnet"
 export DEMO_VNET_CIDR=$VNET_PREFIX"0.0/16"
@@ -199,12 +200,25 @@ docker pull myregistry.azurecr.io/hello-world:v1
 
 
 #Create a service principal and assign permissions 
-az ad sp create-for-rbac --skip-assignment
-#Retrieve the resource ids of vnet and subnet 
-VNET_ID=$(az network vnet show --resource-group myResourceGroup --name myAKSVnet --query id -o tsv)
-SUBNET_ID=$(az network vnet subnet show --resource-group myResourceGroup --vnet-name myAKSVnet --name myAKSSubnet --query id -o tsv)
-#Assign the service principal for your AKS cluster Contributor permissions on the virtual network
-az role assignment create --assignee <appId> --scope $VNET_ID --role Contributor
+
+SERVICE_PRINCIPAL_NAME=acr-service-principal
+
+# Obtain the full registry ID for subsequent command args
+ACR_REGISTRY_ID=$(az acr show --name $MYACR --query id --output tsv)
+
+# Create the service principal with rights scoped to the registry.
+# Default permissions are for docker pull access. Modify the '--role'
+# argument value as desired:
+# acrpull:     pull only
+# acrpush:     push and pull
+# owner:       push, pull, and assign roles
+SP_PASSWD=$(az ad sp create-for-rbac --name http://$SERVICE_PRINCIPAL_NAME --scopes $ACR_REGISTRY_ID --role acrpull --query password --output tsv)
+SP_APP_ID=$(az ad sp show --id http://$SERVICE_PRINCIPAL_NAME --query appId --output tsv)
+
+# Output the service principal's credentials; use these in your services and
+# applications to authenticate to the container registry.
+echo "Service principal ID: $SP_APP_ID"
+echo "Service principal password: $SP_PASSWD"
 
 ################Create a zone redundant Private Cluster in eastus2 or westus2 using kubenet and autoscaler########################
 #kubenet - a simple /24 IP address range can support up to 251 nodes in the cluster (each Azure virtual network subnet reserves the #first three IP addresses for management operations)
@@ -212,23 +226,26 @@ az role assignment create --assignee <appId> --scope $VNET_ID --role Contributor
 #Azure CNI - that same basic /24 subnet range could only support a maximum of 8 nodes in the cluster
 #This node count could only support up to 240 pods (with a default maximum of 30 pods per node with Azure CNI)
 
+VNET_ID=$(az network vnet show --resource-group myResourceGroup --name myAKSVnet --query id -o tsv)
+SUBNET_ID=$(az network vnet subnet show --resource-group $AKS_PE_DEMO_RG --vnet-name DEMO_VNET --name DEMO_VNET_APP_SUBNET --query id -o tsv)
+
 az aks create \
-	-n <private-cluster-name> \
-	-g <resource-group-name> \
+	-n $AKS_PRIVATE_CLUSTER \
+	-g $AKS_PE_DEMO_RG \
 	--load-balancer-sku standard \
-	--enable-managed-identity
+	--enable-managed-identity \
 	--enable-private-cluster \
 	--enable-addons monitoring \
 	--kubernetes-version $version \
 	--generate-ssh-keys \
-	--location <eastus2> \
+	--location $LOCATION \
 	--node-zones {1,2,3} \
 	--network-plugin kubenet \
 	--service-cidr 10.0.0.0/16 \
 	--dns-service-ip 10.0.0.10 \
 	--pod-cidr 10.244.0.0/16 \
 	--docker-bridge-address 172.17.0.1/16 \
-	--vnet-subnet-id <$SUBNET_ID> \
+	--vnet-subnet-id $SUBNET_ID \
 	--node-count 1 \
 	--vm-set-type VirtualMachineScaleSets \
 	--enable-cluster-autoscaler \
