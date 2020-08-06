@@ -388,6 +388,191 @@ helm install nginx-ingress stable/nginx-ingress \
     --set controller.replicaCount=2 \
     --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
     --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux
+    
+kubectl get service -l app=nginx-ingress --namespace ingress-basic
+
+$ kubectl get service -l app=nginx-ingress --namespace ingress-basic
+
+NAME                             TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
+nginx-ingress-controller         LoadBalancer   10.0.61.144    10.240.0.42   80:30386/TCP,443:32276/TCP   6m2s
+nginx-ingress-default-backend    ClusterIP      10.0.192.145   <none>        80/TCP                       6m2s
+
+
+Run demo applications
+To see the ingress controller in action, run two demo applications in your AKS cluster. In this example, you use kubectl apply to deploy two instances of a simple Hello world application.
+
+Create a aks-helloworld.yaml file and copy in the following example YAML:
+
+yml
+
+Copy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aks-helloworld
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aks-helloworld
+  template:
+    metadata:
+      labels:
+        app: aks-helloworld
+    spec:
+      containers:
+      - name: aks-helloworld
+        image: neilpeterson/aks-helloworld:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: TITLE
+          value: "Welcome to Azure Kubernetes Service (AKS)"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aks-helloworld
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    app: aks-helloworld
+Create a ingress-demo.yaml file and copy in the following example YAML:
+
+yml
+
+Copy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingress-demo
+  template:
+    metadata:
+      labels:
+        app: ingress-demo
+    spec:
+      containers:
+      - name: ingress-demo
+        image: neilpeterson/aks-helloworld:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: TITLE
+          value: "AKS Ingress Demo"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-demo
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    app: ingress-demo
+Run the two demo applications using kubectl apply:
+
+Console
+
+Copy
+kubectl apply -f aks-helloworld.yaml --namespace ingress-basic
+kubectl apply -f ingress-demo.yaml --namespace ingress-basic
+Create an ingress route
+Both applications are now running on your Kubernetes cluster. To route traffic to each application, create a Kubernetes ingress resource. The ingress resource configures the rules that route traffic to one of the two applications.
+
+In the following example, traffic to the address http://10.240.0.42/ is routed to the service named aks-helloworld. Traffic to the address http://10.240.0.42/hello-world-two is routed to the ingress-demo service.
+
+Create a file named hello-world-ingress.yaml and copy in the following example YAML.
+
+YAML
+
+Copy
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: hello-world-ingress
+  namespace: ingress-basic
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          serviceName: aks-helloworld
+          servicePort: 80
+        path: /(.*)
+      - backend:
+          serviceName: ingress-demo
+          servicePort: 80
+        path: /hello-world-two(/|$)(.*)
+Create the ingress resource using the kubectl apply -f hello-world-ingress.yaml command.
+
+Console
+
+Copy
+kubectl apply -f hello-world-ingress.yaml
+The following example output shows the ingress resource is created.
+
+
+Copy
+$ kubectl apply -f hello-world-ingress.yaml
+
+ingress.extensions/hello-world-ingress created
+Test the ingress controller
+To test the routes for the ingress controller, browse to the two applications with a web client. If needed, you can quickly test this internal-only functionality from a pod on the AKS cluster. Create a test pod and attach a terminal session to it:
+
+Console
+
+Copy
+kubectl run -it --rm aks-ingress-test --image=debian --namespace ingress-basic
+Install curl in the pod using apt-get:
+
+Console
+
+Copy
+apt-get update && apt-get install -y curl
+Now access the address of your Kubernetes ingress controller using curl, such as http://10.240.0.42. Provide your own internal IP address specified when you deployed the ingress controller in the first step of this article.
+
+Console
+
+Copy
+curl -L http://10.240.0.42
+No additional path was provided with the address, so the ingress controller defaults to the / route. The first demo application is returned, as shown in the following condensed example output:
+
+
+Copy
+$ curl -L http://10.240.0.42
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/default.css">
+    <title>Welcome to Azure Kubernetes Service (AKS)</title>
+[...]
+Now add /hello-world-two path to the address, such as http://10.240.0.42/hello-world-two. The second demo application with the custom title is returned, as shown in the following condensed example output:
+
+
+Copy
+$ curl -L -k http://10.240.0.42/hello-world-two
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/default.css">
+    <title>AKS Ingress Demo</title>
+[...]
+
+
 ```
  3) Create a private link service to the load balancer for the ingress. 
  
