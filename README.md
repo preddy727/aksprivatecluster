@@ -354,7 +354,20 @@ kubectl get service azure-vote-front --watch
 
 An ingress controller is a piece of software that provides reverse proxy, configurable traffic routing, and TLS termination for Kubernetes services. Kubernetes ingress resources are used to configure the ingress rules and routes for individual Kubernetes services. Using an ingress controller and ingress rules, a single IP address can be used to route traffic to multiple services in a Kubernetes cluster.
 
-1) Install applications with Helm in Azure Kubernetes Service (AKS)
+
+1) Create an ingress controller. 
+
+Create a file named internal-ingress.yaml using the following example manifest file. This example assigns 10.240.0.42 to the loadBalancerIP resource. Provide your own internal IP address for use with the ingress controller. Make sure that this IP address is not already in use within your virtual network.
+
+```yaml
+controller:
+  service:
+    loadBalancerIP: 10.240.0.42
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+ ```
+ 
+2) Install applications with Helm in Azure Kubernetes Service (AKS)
 
 https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 ```powershell
@@ -368,19 +381,6 @@ helm install my-nginx-ingress stable/nginx-ingress \
 kubectl --namespace default get services -o wide -w my-nginx-ingress-controller
 
 ```
-
-2) Create an ingress controller. 
-
-Create a file named internal-ingress.yaml using the following example manifest file. This example assigns 10.240.0.42 to the loadBalancerIP resource. Provide your own internal IP address for use with the ingress controller. Make sure that this IP address is not already in use within your virtual network.
-
-```yaml
-controller:
-  service:
-    loadBalancerIP: 10.240.0.42
-    annotations:
-      service.beta.kubernetes.io/azure-load-balancer-internal: "true"
- ```
- 
  3) Create a private link service to the load balancer for the ingress. 
  
  4) Create a private endpoint pointing at the resource id of the pls 
