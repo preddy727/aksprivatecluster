@@ -34,7 +34,7 @@ export DEMO_VNET_APP_SUBNET_CIDR=$VNET_PREFIX"1.0/24"
 
 # set this to the name of your Azure Container Registry.  It must be globally unique
 export MYACR=$APP_PREFIX"myContainerRegistry"
-
+export VM_NAME=myDockerVM
 
 
 
@@ -59,6 +59,35 @@ az network vnet create \
 # Run the following line to create an Azure Container Registry if you do not already have one
 az acr create -n $MYACR -g $AKS_PE_DEMO_RG --sku basic
 
+#deploy a default Ubuntu Azure virtual machine with
+az vm create \
+  --resource-group $AKS_PE_DEMO_RG \
+  --name $VM_NAME \
+  --image UbuntuLTS \
+  --admin-username azureuser \
+  --generate-ssh-keys
+
+#Install Docker on the VM
+ssh azureuser@publicIpAddress
+sudo apt-get update
+sudo apt install docker.io -y
+sudo docker run -it hello-world
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+[...]
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+#Get network and subnet names
+NETWORK_NAME=$(az network vnet list \
+  --resource-group $AKS_PE_DEMO_RG \
+  --query '[].{Name: name}' --output tsv)
+
+SUBNET_NAME=$(az network vnet list \
+  --resource-group $AKS_PE_DEMO_RG \
+  --query '[].{Subnet: subnets[0].name}' --output tsv)
+
+echo NETWORK_NAME=$NETWORK_NAME
+echo SUBNET_NAME=$SUBNET_NAME
  
 #Create a service principal and assign permissions 
 az ad sp create-for-rbac --skip-assignment
