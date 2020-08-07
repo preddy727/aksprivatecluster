@@ -578,9 +578,22 @@ $ curl -L -k http://192.168.1.42/hello-world-two
 
 
 ```
- 3) Create a private link service to the load balancer resource id. 
+ 3) Create a private link service to the kubernetes-internal load balancer resource id within the MC_* resource group. 
  
- 4) Create a private endpoint pointing at the resource id of the pls.  
+ Go to the MC resource group to get details about the kubernetes-internal load balancer. 
+ 
+ az network private-link-service create \
+--resource-group MC_preastus2-aksdemo-rg_preastus2-aksdemo-aks_eastus2 \
+--name myPLS \
+--vnet-name preastus2-aksdemo-vnet \
+--subnet app_subnet \
+--lb-name kubernetes-internal \
+--lb-frontend-ip-configs a76d32872cdc54f84ae4c7a6dffa2ed8 \
+--location eastus2
+  
+ 4) Create a private endpoint in the Azure DevOps agent resource group pointing at the resource id of the pls.  
+ 
+ az network private-endpoint create --name IngressEndpoint --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --subnet $AKS_PE_SUBNET --private-connection-resource-id <resource id from properties of pls created in step 3 above>  --group-ids management --connection-name myIngressConnection
  
 
 ### Daemonset deployment
