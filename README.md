@@ -398,7 +398,7 @@ kubectl get service -l app=nginx-ingress --namespace ingress-basic
 $ kubectl get service -l app=nginx-ingress --namespace ingress-basic
 
 NAME                             TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
-nginx-ingress-controller         LoadBalancer   10.0.61.144    10.240.0.42   80:30386/TCP,443:32276/TCP   6m2s
+nginx-ingress-controller         LoadBalancer   10.0.61.144    192.168.1.42   80:30386/TCP,443:32276/TCP   6m2s
 nginx-ingress-default-backend    ClusterIP      10.0.192.145   <none>        80/TCP                       6m2s
 
 
@@ -491,7 +491,7 @@ kubectl apply -f ingress-demo.yaml --namespace ingress-basic
 Create an ingress route
 Both applications are now running on your Kubernetes cluster. To route traffic to each application, create a Kubernetes ingress resource. The ingress resource configures the rules that route traffic to one of the two applications.
 
-In the following example, traffic to the address http://10.240.0.42/ is routed to the service named aks-helloworld. Traffic to the address http://10.240.0.42/hello-world-two is routed to the ingress-demo service.
+In the following example, traffic to the address http://192.168.1.42/ is routed to the service named aks-helloworld. Traffic to the address http://192.168.1.42/hello-world-two is routed to the ingress-demo service.
 
 Create a file named hello-world-ingress.yaml and copy in the following example YAML.
 
@@ -550,12 +550,12 @@ Now access the address of your Kubernetes ingress controller using curl, such as
 Console
 
 Copy
-curl -L http://10.240.0.42
+curl -L http://192.168.1.42
 No additional path was provided with the address, so the ingress controller defaults to the / route. The first demo application is returned, as shown in the following condensed example output:
 
 
 Copy
-$ curl -L http://10.240.0.42
+$ curl -L http://192.168.1.42
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -567,7 +567,7 @@ Now add /hello-world-two path to the address, such as http://10.240.0.42/hello-w
 
 
 Copy
-$ curl -L -k http://10.240.0.42/hello-world-two
+$ curl -L -k http://192.168.1.42/hello-world-two
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -578,12 +578,10 @@ $ curl -L -k http://10.240.0.42/hello-world-two
 
 
 ```
- 3) Create a private link service to the load balancer for the ingress. 
+ 3) Create a private link service to the load balancer resource id. 
  
- 4) Create a private endpoint pointing at the resource id of the pls 
+ 4) Create a private endpoint pointing at the resource id of the pls.  
  
- az network private-endpoint create --name PrivateingressEndpoint2 --resource-group Bastion --vnet-name BastionVMVNET --subnet BastionPESubnet2 --private-connection-resource-id <plsresourceid> --connection-name myingressConnection
-
 
 ### Daemonset deployment
 1)	Please go through this forked git repo to look at the code for the daemonset, configmap and docker file: https://github.com/naveedzaheer/AKSNodeInstaller 
