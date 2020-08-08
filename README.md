@@ -514,10 +514,6 @@ spec:
 ```
 
 Run the two demo applications using kubectl apply:
-
-Console
-
-Copy
 kubectl apply -f aks-helloworld.yaml --namespace ingress-basic
 kubectl apply -f ingress-demo.yaml --namespace ingress-basic
 Create an ingress route
@@ -561,9 +557,6 @@ ingress.extensions/hello-world-ingress created
 Test the ingress controller
 To test the routes for the ingress controller, browse to the two applications with a web client. If needed, you can quickly test this internal-only functionality from a pod on the AKS cluster. Create a test pod and attach a terminal session to it:
 
-Console
-
-Copy
 kubectl run -it --rm aks-ingress-test --image=debian --namespace ingress-basic
 Install curl in the pod using apt-get:
 
