@@ -543,6 +543,7 @@ spec:
           servicePort: 80
         path: /hello-world-two(/|$)(.*)
 ```
+```powershell
 Create the ingress resource using the kubectl apply -f hello-world-ingress.yaml command.
 
 kubectl apply -f hello-world-ingress.yaml
@@ -585,7 +586,7 @@ $ curl -L -k http://192.168.1.42/hello-world-two
 [...]
 
 
-```
+
  3) Create a private link service to the kubernetes-internal load balancer resource id within the MC_* resource group. 
  
  Go to the MC resource group to get details about the kubernetes-internal load balancer. 
@@ -650,3 +651,4 @@ o	Canary Deployment Strategy is most common
 
 •	Build and Deploy to Azure Kubernetes Service 
 
+```
