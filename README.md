@@ -632,8 +632,8 @@ c.	You can also build your image by using the Dockerfile in the repo: https://gi
 
 8)	You can use SSH to get to the AKS node to see the change made by daemonset after it is deployed https://docs.microsoft.com/en-us/azure/aks/ssh 
 ```
-### Azure DevOps 
+### Azure DevOps & Terraform setup
 ## Prerequisites
-```powershell 
-https://github.com/aleguillen/private-aks-app
-```
+
+* Deploy a Private Azure Kubernetes Service using Azure DevOps ![alt text](https://github.com/aleguillen/private-aks-app)
+
