@@ -509,7 +509,7 @@ spec:
   selector:
     app: ingress-demo
 ```
-
+```powershell
 Run the two demo applications using kubectl apply:
 kubectl apply -f aks-helloworld.yaml --namespace ingress-basic
 kubectl apply -f ingress-demo.yaml --namespace ingress-basic
@@ -519,7 +519,7 @@ Both applications are now running on your Kubernetes cluster. To route traffic t
 In the following example, traffic to the address http://192.168.1.42/ is routed to the service named aks-helloworld. Traffic to the address http://192.168.1.42/hello-world-two is routed to the ingress-demo service.
 
 Create a file named hello-world-ingress.yaml and copy in the following example YAML.
-
+```
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
