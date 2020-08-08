@@ -441,8 +441,6 @@ To see the ingress controller in action, run two demo applications in your AKS c
 Create a aks-helloworld.yaml file and copy in the following example YAML:
 
 ```yaml
-
-Copy
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -480,7 +478,6 @@ spec:
     
 Create a ingress-demo.yaml file and copy in the following example YAML:
 ```yaml
-copy
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -531,8 +528,6 @@ In the following example, traffic to the address http://192.168.1.42/ is routed 
 Create a file named hello-world-ingress.yaml and copy in the following example YAML.
 
 ```yaml
-
-Copy
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
@@ -557,14 +552,9 @@ spec:
 ```
 Create the ingress resource using the kubectl apply -f hello-world-ingress.yaml command.
 
-Console
-
-Copy
 kubectl apply -f hello-world-ingress.yaml
 The following example output shows the ingress resource is created.
 
-
-Copy
 $ kubectl apply -f hello-world-ingress.yaml
 
 ingress.extensions/hello-world-ingress created
@@ -577,20 +567,13 @@ Copy
 kubectl run -it --rm aks-ingress-test --image=debian --namespace ingress-basic
 Install curl in the pod using apt-get:
 
-Console
-
-Copy
 apt-get update && apt-get install -y curl
 Now access the address of your Kubernetes ingress controller using curl, such as http://10.240.0.42. Provide your own internal IP address specified when you deployed the ingress controller in the first step of this article.
 
-Console
-
-Copy
 curl -L http://192.168.1.42
 No additional path was provided with the address, so the ingress controller defaults to the / route. The first demo application is returned, as shown in the following condensed example output:
 
 
-Copy
 $ curl -L http://192.168.1.42
 
 <!DOCTYPE html>
@@ -602,7 +585,6 @@ $ curl -L http://192.168.1.42
 Now add /hello-world-two path to the address, such as http://10.240.0.42/hello-world-two. The second demo application with the custom title is returned, as shown in the following condensed example output:
 
 
-Copy
 $ curl -L -k http://192.168.1.42/hello-world-two
 
 <!DOCTYPE html>
