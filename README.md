@@ -345,7 +345,6 @@ az acr repository list --name $MYACR --output table
 Create azure-vote-all-in-one-redis.yaml using the following manifest. 
 
 ```yaml
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
