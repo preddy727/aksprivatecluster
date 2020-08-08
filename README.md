@@ -341,6 +341,7 @@ az acr repository list --name $MYACR --output table
  # Get the ACR registry resource id
  ACR_ID=$(az acr show --name $MYACR --resource-group $AKS_PE_DEMO_RG --query "id" --output tsv)
 
+```
 #Deploy the application
 Create azure-vote-all-in-one-redis.yaml using the following manifest. 
 
@@ -380,9 +381,6 @@ spec:
 ---
 apiVersion: apps/v1
 kind: Deployment
-```
-
-
 
 kubectl apply -f azure-vote-all-in-one-redis.yaml
 kubectl get service azure-vote-front --watch
