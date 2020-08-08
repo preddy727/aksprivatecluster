@@ -381,10 +381,9 @@ spec:
 ---
 apiVersion: apps/v1
 kind: Deployment
-
+```
 kubectl apply -f azure-vote-all-in-one-redis.yaml
 kubectl get service azure-vote-front --watch
-```
 ### Create an ingress controller to an internal virtual network in Azure Kubernetes Service (AKS)
 
 An ingress controller is a piece of software that provides reverse proxy, configurable traffic routing, and TLS termination for Kubernetes services. Kubernetes ingress resources are used to configure the ingress rules and routes for individual Kubernetes services. Using an ingress controller and ingress rules, a single IP address can be used to route traffic to multiple services in a Kubernetes cluster.
@@ -435,7 +434,7 @@ nginx-ingress-default-backend    ClusterIP      10.0.192.145   <none>        80/
 
 Run demo applications
 To see the ingress controller in action, run two demo applications in your AKS cluster. In this example, you use kubectl apply to deploy two instances of a simple Hello world application.
-
+```
 Create a aks-helloworld.yaml file and copy in the following example YAML:
 
 ```yaml
