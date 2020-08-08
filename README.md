@@ -299,21 +299,22 @@ az network private-dns link vnet create -g $ADO_PE_DEMO_RG -n MyDNSLinktoBastion
 
 ## Validate connectivity to cluster
 ```powershell 
-Run the following from the ADO VM that has access to the endpoint created in the ADO Subnet. 
+##Run the following from the ADO VM that has access to the endpoint created in the ADO Subnet. 
 
-Connect to the cluster
-To manage a Kubernetes cluster, you use kubectl, the Kubernetes command-line client. If you use Azure Cloud Shell, kubectl is already installed. To install kubectl locally, use the az aks install-cli command:
-Azure CLI 
+##Connect to the cluster
+##To manage a Kubernetes cluster, you use kubectl, the Kubernetes command-line client. If you use Azure Cloud Shell, kubectl is already installed. To install ##kubectl locally, use the az aks install-cli command:
+
 sudo az aks install-cli
-To configure kubectl to connect to your Kubernetes cluster, use the az aks get-credentials command. This command downloads credentials and configures the Kubernetes CLI to use them.
-Azure CLI  
+##To configure kubectl to connect to your Kubernetes cluster, use the az aks get-credentials command. This command downloads credentials and configures the ##Kubernetes CLI to use them.
+
 az aks get-credentials --resource-group $AKS_PE_DEMO_RG --name $AKS_PRIVATE_CLUSTER
-To verify the connection to your cluster, use the kubectl get command to return a list of the cluster nodes.
-Azure CLI 
+
+##To verify the connection to your cluster, use the kubectl get command to return a list of the cluster nodes.
+ 
 kubectl get nodes
-The following example output shows the single node created in the previous steps. Make sure that the status of the node is Ready:
-	NAME                       STATUS   ROLES   AGE     VERSION
-	aks-nodepool1-31718369-0   Ready    agent   6m44s   v1.12.8
+##The following example output shows the single node created in the previous steps. Make sure that the status of the node is Ready:
+##	NAME                       STATUS   ROLES   AGE     VERSION
+##	aks-nodepool1-31718369-0   Ready    agent   6m44s   v1.12.8
 ```
 
 ### Docker Compose and push to ACR
@@ -389,9 +390,9 @@ kubectl get service azure-vote-front --watch
 An ingress controller is a piece of software that provides reverse proxy, configurable traffic routing, and TLS termination for Kubernetes services. Kubernetes ingress resources are used to configure the ingress rules and routes for individual Kubernetes services. Using an ingress controller and ingress rules, a single IP address can be used to route traffic to multiple services in a Kubernetes cluster.
 
 
-1) Create an ingress controller. 
+##Create an ingress controller. 
 
-Create a file named internal-ingress.yaml using the following example manifest file. This example assigns 10.240.0.42 to the loadBalancerIP resource. Provide your own internal IP address for use with the ingress controller. Make sure that this IP address is not already in use within your virtual network.
+##Create a file named internal-ingress.yaml using the following example manifest file. This example assigns 10.240.0.42 to the loadBalancerIP resource. Provide ##your own internal IP address for use with the ingress controller. Make sure that this IP address is not already in use within your virtual network.
 
 ```yaml
 controller:
@@ -401,9 +402,9 @@ controller:
       service.beta.kubernetes.io/azure-load-balancer-internal: "true"
  ```
  
-2) Install applications with Helm in Azure Kubernetes Service (AKS)
+##Install applications with Helm in Azure Kubernetes Service (AKS)
 
-https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
+##https://docs.microsoft.com/en-us/azure/aks/kubernetes-helm
 ```powershell
 
 # Create a namespace for your ingress resources
@@ -425,17 +426,17 @@ helm install nginx-ingress stable/nginx-ingress \
     
 kubectl get service -l app=nginx-ingress --namespace ingress-basic
 
-$ kubectl get service -l app=nginx-ingress --namespace ingress-basic
+kubectl get service -l app=nginx-ingress --namespace ingress-basic
 
-NAME                             TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
-nginx-ingress-controller         LoadBalancer   10.0.61.144    192.168.1.42   80:30386/TCP,443:32276/TCP   6m2s
-nginx-ingress-default-backend    ClusterIP      10.0.192.145   <none>        80/TCP                       6m2s
+##NAME                             TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
+##nginx-ingress-controller         LoadBalancer   10.0.61.144    192.168.1.42   80:30386/TCP,443:32276/TCP   6m2s
+##nginx-ingress-default-backend    ClusterIP      10.0.192.145   <none>        80/TCP                       6m2s
 
 
-Run demo applications
-To see the ingress controller in action, run two demo applications in your AKS cluster. In this example, you use kubectl apply to deploy two instances of a simple Hello world application.
+##Run demo applications
+##To see the ingress controller in action, run two demo applications in your AKS cluster. In this example, you use kubectl apply to deploy two instances of a ##simple Hello world application.
 ```
-Create a aks-helloworld.yaml file and copy in the following example YAML:
+##Create a aks-helloworld.yaml file and copy in the following example YAML:
 
 ```yaml
 apiVersion: apps/v1
@@ -473,7 +474,7 @@ spec:
     app: aks-helloworld
 ```    
     
-Create a ingress-demo.yaml file and copy in the following example YAML:
+##Create a ingress-demo.yaml file and copy in the following example YAML:
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -510,15 +511,15 @@ spec:
     app: ingress-demo
 ```
 ```powershell
-Run the two demo applications using kubectl apply:
+##Run the two demo applications using kubectl apply:
 kubectl apply -f aks-helloworld.yaml --namespace ingress-basic
 kubectl apply -f ingress-demo.yaml --namespace ingress-basic
-Create an ingress route
-Both applications are now running on your Kubernetes cluster. To route traffic to each application, create a Kubernetes ingress resource. The ingress resource configures the rules that route traffic to one of the two applications.
+##Create an ingress route
+##Both applications are now running on your Kubernetes cluster. To route traffic to each application, create a Kubernetes ingress resource. The ingress resource ##configures the rules that route traffic to one of the two applications.
 
-In the following example, traffic to the address http://192.168.1.42/ is routed to the service named aks-helloworld. Traffic to the address http://192.168.1.42/hello-world-two is routed to the ingress-demo service.
+##In the following example, traffic to the address http://192.168.1.42/ is routed to the service named aks-helloworld. Traffic to the address ##http://192.168.1.42/hello-world-two is routed to the ingress-demo service.
 
-Create a file named hello-world-ingress.yaml and copy in the following example YAML.
+##Create a file named hello-world-ingress.yaml and copy in the following example YAML.
 ```
 ```yaml
 apiVersion: networking.k8s.io/v1beta1
@@ -544,7 +545,7 @@ spec:
         path: /hello-world-two(/|$)(.*)
 ```
 ```powershell
-Create the ingress resource using the kubectl apply -f hello-world-ingress.yaml command.
+##Create the ingress resource using the kubectl apply -f hello-world-ingress.yaml command.
 
 kubectl apply -f hello-world-ingress.yaml
 The following example output shows the ingress resource is created.
@@ -559,37 +560,36 @@ kubectl run -it --rm aks-ingress-test --image=debian --namespace ingress-basic
 Install curl in the pod using apt-get:
 
 apt-get update && apt-get install -y curl
-Now access the address of your Kubernetes ingress controller using curl, such as http://10.240.0.42. Provide your own internal IP address specified when you deployed the ingress controller in the first step of this article.
+##Now access the address of your Kubernetes ingress controller using curl, such as http://10.240.0.42. Provide your own internal IP address specified when you ##deployed the ingress controller in the first step of this article.
 
 curl -L http://192.168.1.42
-No additional path was provided with the address, so the ingress controller defaults to the / route. The first demo application is returned, as shown in the following condensed example output:
+##No additional path was provided with the address, so the ingress controller defaults to the / route. The first demo application is returned, as shown in the ##following condensed example output:
 
 
-$ curl -L http://192.168.1.42
+curl -L http://192.168.1.42
 
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <link rel="stylesheet" type="text/css" href="/static/default.css">
-    <title>Welcome to Azure Kubernetes Service (AKS)</title>
-[...]
-Now add /hello-world-two path to the address, such as http://10.240.0.42/hello-world-two. The second demo application with the custom title is returned, as shown in the following condensed example output:
-
-
-$ curl -L -k http://192.168.1.42/hello-world-two
-
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <link rel="stylesheet" type="text/css" href="/static/default.css">
-    <title>AKS Ingress Demo</title>
-[...]
+##<!DOCTYPE html>
+##<html xmlns="http://www.w3.org/1999/xhtml">
+##<head>
+##    <link rel="stylesheet" type="text/css" href="/static/default.css">
+##    <title>Welcome to Azure Kubernetes Service (AKS)</title>
+##[...]
+##Now add /hello-world-two path to the address, such as http://10.240.0.42/hello-world-two. The second demo application with the custom title is returned, as shown ##in the following condensed example output:
 
 
+curl -L -k http://192.168.1.42/hello-world-two
 
- 3) Create a private link service to the kubernetes-internal load balancer resource id within the MC_* resource group. 
- 
- Go to the MC resource group to get details about the kubernetes-internal load balancer. 
+##<!DOCTYPE html>
+##<html xmlns="http://www.w3.org/1999/xhtml">
+##<head>
+##    <link rel="stylesheet" type="text/css" href="/static/default.css">
+##    <title>AKS Ingress Demo</title>
+##[...]
+
+
+
+##Create a private link service to the kubernetes-internal load balancer resource id within the MC_* resource group. 
+##Go to the MC resource group to get details about the kubernetes-internal load balancer. 
  
  az network private-link-service create \
 --resource-group MC_preastus2-aksdemo-rg_preastus2-aksdemo-aks_eastus2 \
@@ -600,9 +600,9 @@ $ curl -L -k http://192.168.1.42/hello-world-two
 --lb-frontend-ip-configs a76d32872cdc54f84ae4c7a6dffa2ed8 \
 --location eastus2
   
- 4) Create a private endpoint in the Azure DevOps agent resource group pointing at the resource id of the pls.  
+##Create a private endpoint in the Azure DevOps agent resource group pointing at the resource id of the pls.  
  
- az network private-endpoint create --name IngressEndpoint --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --subnet $AKS_PE_SUBNET --private-connection-resource-id <resource id from properties of pls created in step 3 above>  --group-ids management --connection-name myIngressConnection
+az network private-endpoint create --name IngressEndpoint --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --subnet $AKS_PE_SUBNET --private-connection-resource-id <resource id from properties of pls created in step 3 above>  --group-ids management --connection-name myIngressConnection
  
 ```
 ### Daemonset deployment
