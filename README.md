@@ -635,20 +635,5 @@ c.	You can also build your image by using the Dockerfile in the repo: https://gi
 ### Azure DevOps 
 ## Prerequisites
 ```powershell 
-1)	A GitHub account, where you can create a repository. If you don't have one, you can create one for free.
-2) 	An Azure DevOps organization. If you don't have one, you can create one for free. (An Azure DevOps organization is different from your GitHub organization. Give them the same name if you want alignment between them.)
-If your team already has one, then make sure you're an administrator of the Azure DevOps project that you want to use.
-3)	Allow the AKS Vnet and the jump server vnet access to Azure Container registry. Restrict access to an Azure container registry using an Azure virtual network or firewall rules
-4) 	To run your jobs, you'll need at least one agent. A Linux agent can build and deploy different kinds of apps, including Java and Android apps. We support Ubuntu, Red Hat, and CentOS. Self-hosted Linux agents
-5) Step by Step Guides
-	Build Images
-	Push Images
-	Deploy Manifests
-	Bake Manifests
-	Deployment strategies
-	Canary Deployment Strategy is most common
-	https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/kubernetes/canary-demo?view=azure-devops
-
-	Build and Deploy to Azure Kubernetes Service 
-
+https://github.com/aleguillen/private-aks-app
 ```
