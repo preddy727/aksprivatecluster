@@ -547,17 +547,20 @@ spec:
 ```powershell
 ##Create the ingress resource using the kubectl apply -f hello-world-ingress.yaml command.
 
+
 kubectl apply -f hello-world-ingress.yaml
-The following example output shows the ingress resource is created.
 
-$ kubectl apply -f hello-world-ingress.yaml
 
-ingress.extensions/hello-world-ingress created
-Test the ingress controller
-To test the routes for the ingress controller, browse to the two applications with a web client. If needed, you can quickly test this internal-only functionality from a pod on the AKS cluster. Create a test pod and attach a terminal session to it:
+##The following example output shows the ingress resource is created.
+
+kubectl apply -f hello-world-ingress.yaml
+
+##ingress.extensions/hello-world-ingress created
+##Test the ingress controller
+##To test the routes for the ingress controller, browse to the two applications with a web client. If needed, you can quickly test this internal-only functionality ##from a pod on the AKS cluster. Create a test pod and attach a terminal session to it:
 
 kubectl run -it --rm aks-ingress-test --image=debian --namespace ingress-basic
-Install curl in the pod using apt-get:
+##Install curl in the pod using apt-get:
 
 apt-get update && apt-get install -y curl
 ##Now access the address of your Kubernetes ingress controller using curl, such as http://10.240.0.42. Provide your own internal IP address specified when you ##deployed the ingress controller in the first step of this article.
@@ -638,14 +641,14 @@ If your team already has one, then make sure you're an administrator of the Azur
 3)	Allow the AKS Vnet and the jump server vnet access to Azure Container registry. Restrict access to an Azure container registry using an Azure virtual network or firewall rules
 4) 	To run your jobs, you'll need at least one agent. A Linux agent can build and deploy different kinds of apps, including Java and Android apps. We support Ubuntu, Red Hat, and CentOS. Self-hosted Linux agents
 5) Step by Step Guides
-•	Build Images
-•	Push Images
-•	Deploy Manifests
-•	Bake Manifests
-•	Deployment strategies
-o	Canary Deployment Strategy is most common
-	https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/kubernetes/canary-demo?view=azure-devops
+	Build Images
+	Push Images
+	Deploy Manifests
+	Bake Manifests
+	Deployment strategies
+	Canary Deployment Strategy is most common
+	https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/kubernetes/canary-demo?view=azure-devops
 
-•	Build and Deploy to Azure Kubernetes Service 
+	Build and Deploy to Azure Kubernetes Service 
 
 ```
