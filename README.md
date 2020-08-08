@@ -635,5 +635,5 @@ c.	You can also build your image by using the Dockerfile in the repo: https://gi
 ### Azure DevOps & Terraform setup
 ## Prerequisites
 
-* Deploy a Private Azure Kubernetes Service using Azure DevOps ![alt text](https://github.com/aleguillen/private-aks-app)
+* Deploy a Private Azure Kubernetes Service using Azure DevOps ![Github](https://github.com/aleguillen/private-aks-app)
 
