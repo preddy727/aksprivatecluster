@@ -342,13 +342,16 @@ az acr repository list --name $MYACR --output table
  ACR_ID=$(az acr show --name $MYACR --resource-group $AKS_PE_DEMO_RG --query "id" --output tsv)
 
 #Deploy the application
-vi azure-vote-all-in-one-redis.yaml
+Create azure-vote-all-in-one-redis.yaml using the following manifest. 
 
-##############
-containers:
-- name: azure-vote-front
-  image: preastus2mycontainerregistry.azurecr.io/azure-vote-front:v1
-###############
+```yaml
+
+
+
+
+
+```
+
 
 
 kubectl apply -f azure-vote-all-in-one-redis.yaml
@@ -407,7 +410,7 @@ To see the ingress controller in action, run two demo applications in your AKS c
 
 Create a aks-helloworld.yaml file and copy in the following example YAML:
 
-yml
+```yaml
 
 Copy
 apiVersion: apps/v1
@@ -443,11 +446,11 @@ spec:
   - port: 80
   selector:
     app: aks-helloworld
+```    
+    
 Create a ingress-demo.yaml file and copy in the following example YAML:
-
-yml
-
-Copy
+```yaml
+copy
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -481,6 +484,8 @@ spec:
   - port: 80
   selector:
     app: ingress-demo
+```
+
 Run the two demo applications using kubectl apply:
 
 Console
@@ -495,7 +500,7 @@ In the following example, traffic to the address http://192.168.1.42/ is routed 
 
 Create a file named hello-world-ingress.yaml and copy in the following example YAML.
 
-YAML
+```yaml
 
 Copy
 apiVersion: networking.k8s.io/v1beta1
@@ -519,6 +524,7 @@ spec:
           serviceName: ingress-demo
           servicePort: 80
         path: /hello-world-two(/|$)(.*)
+```
 Create the ingress resource using the kubectl apply -f hello-world-ingress.yaml command.
 
 Console
