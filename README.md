@@ -604,8 +604,9 @@ $ curl -L -k http://192.168.1.42/hello-world-two
  
  az network private-endpoint create --name IngressEndpoint --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --subnet $AKS_PE_SUBNET --private-connection-resource-id <resource id from properties of pls created in step 3 above>  --group-ids management --connection-name myIngressConnection
  
-
+```
 ### Daemonset deployment
+```powershell 
 1)	Please go through this forked git repo to look at the code for the daemonset, configmap and docker file: https://github.com/naveedzaheer/AKSNodeInstaller 
 	a.	Please review this article as well: https://medium.com/@patnaikshekhar/initialize-your-aks-nodes-with-daemonsets-679fa81fd20e 
 2)	Clone the repo on your machine and make changes to configmap as needed to use squid proxy: https://www.thegeekdiary.com/how-to-configure-docker-to-use-proxy/ 
@@ -627,14 +628,10 @@ c.	You can also build your image by using the Dockerfile in the repo: https://gi
 7)	Deploy the daemonset to the cluster. 
 
 8)	You can use SSH to get to the AKS node to see the change made by daemonset after it is deployed https://docs.microsoft.com/en-us/azure/aks/ssh 
-
-
+```
 ### Azure DevOps 
-
- 
-
- 
 ## Prerequisites
+```powershell 
 1)	A GitHub account, where you can create a repository. If you don't have one, you can create one for free.
 2) 	An Azure DevOps organization. If you don't have one, you can create one for free. (An Azure DevOps organization is different from your GitHub organization. Give them the same name if you want alignment between them.)
 If your team already has one, then make sure you're an administrator of the Azure DevOps project that you want to use.
