@@ -12,7 +12,7 @@ The Azure CLI version 2.2.0 or later or later
 * Process flow ![alt text](https://github.com/preddy727/aksprivatecluster/blob/master/architecture%20(1).png)
 
 ## Goals of the Lab
-1. Create a private AKS cluster.   
+1. Create a private AKS cluster, private Azure Container Registry and ingress controller on internal network. 
 
 ## Setup a private Azure Container registry and create a private AKS cluster
 ```powershell
@@ -636,4 +636,8 @@ c.	You can also build your image by using the Dockerfile in the repo: https://gi
 ## Prerequisites
 
 * Deploy a Private Azure Kubernetes Service using Azure DevOps ![Github](https://github.com/aleguillen/private-aks-app)
+
+### Doing More with Service Mesh 
+
+
 
