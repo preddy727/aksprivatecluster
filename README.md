@@ -706,7 +706,7 @@ spec:
           imagePullPolicy: IfNotPresent
           # create users and dirs
           # user:password:uid:gid:directories
-          args: ["azureuser:Dhruva727:100:100:incoming,outgoing"]
+          args: ["azureuser::::incoming,outgoing"]
           ports:
             - containerPort: 22
           volumeMounts:
