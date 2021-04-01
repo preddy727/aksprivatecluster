@@ -630,6 +630,145 @@ c.	You can also build your image by using the Dockerfile in the repo: https://gi
 
 8)	You can use SSH to get to the AKS node to see the change made by daemonset after it is deployed https://docs.microsoft.com/en-us/azure/aks/ssh 
 ```
+
+### Create an SFTP Pod to serve as an SFTP appliance 
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sftp
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: sftp
+  namespace: sftp
+  labels:
+    environment: production
+spec:
+  type: "LoadBalancer"
+  ports:
+  - name: "ssh"
+    # don't use the default part, to allow the machine this runs on to be accessed using ssh
+    port: 23
+    targetPort: 22
+  selector:
+    app: sftp
+status:
+  loadBalancer: {}
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: sftp
+  namespace: sftp
+  labels:
+    environment: production
+    app: sftp
+spec:
+  # how many pods and indicate which strategy we want for rolling update
+  replicas: 1
+  minReadySeconds: 10
+  selector:
+    matchLabels:
+      environment: production
+      app: sftp
+
+  template:
+    metadata:
+      labels:
+        environment: production
+        app: sftp
+
+    spec:
+      # secrets and config
+      volumes:
+        - name: sftp-client-public-keys
+          secret:
+            secretName: sftp-client-public-keys
+        - name: sftp-host-keys
+          secret:
+            secretName: sftp-host-keys
+            defaultMode: 0600
+        - name: sftp-data
+          persistentVolumeClaim:
+            claimName: my-azurefile
+
+      containers:
+        # the sftp server itself
+        - name: sftp
+          # use kalioz/sftp:latest instead of atmoz/sftp:latest if you need arm compatibility
+          image: atmoz/sftp:latest
+          imagePullPolicy: IfNotPresent
+          # create users and dirs
+          # user:password:uid:gid:directories
+          args: ["azureuser:Dhruva727:100:100:incoming,outgoing"]
+          ports:
+            - containerPort: 22
+          volumeMounts:
+            - mountPath: /home/azureuser/.ssh/keys
+              name: sftp-client-public-keys
+              readOnly: true
+            - mountPath: /etc/ssh/ssh_host_rsa_key
+              name: sftp-host-keys
+              subPath: ssh_host_rsa_key
+              readOnly: true
+            - mountPath: /etc/ssh/ssh_host_rsa_key.pub
+              name: sftp-host-keys
+              subPath: ssh_host_rsa_key.pub
+              readOnly: true
+            - mountPath: /etc/ssh/ssh_host_ed25519_key
+              name: sftp-host-keys
+              subPath: ssh_host_ed25519_key
+              readOnly: true
+            - mountPath: /etc/ssh/ssh_host_ed25519_key.pub
+              name: sftp-host-keys
+              subPath: ssh_host_ed25519_key.pub
+              readOnly: true
+            - mountPath: /home/azureuser/incoming
+              name: sftp-data
+          securityContext:
+            capabilities:
+              add: ["SYS_ADMIN"]
+          resources: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-azurefile
+  namespace: sftp
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: my-azurefile
+  resources:
+    requests:
+      storage: 5Gi
+ 
+ ---
+ kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: my-azurefile
+provisioner: kubernetes.io/azure-file
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=0
+  - gid=0
+  - mfsymlinks
+  - cache=strict
+  - actimeo=30
+parameters:
+  skuName: Standard_LRS
+
+
+
+```
 ### Azure DevOps & Terraform setup
 ## Prerequisites
 
