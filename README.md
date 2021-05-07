@@ -633,6 +633,27 @@ c.	You can also build your image by using the Dockerfile in the repo: https://gi
 
 ### Create an SFTP Pod to serve as an SFTP appliance 
 ```yaml
+
+# This kubernetes manifest for http://github.com/atmoz/sftp is made by ToMe25, based on a similar one by jujhars13.
+#
+# Usage:
+# 1. Create the sftp namespace using `kubectl create namespace sftp`.
+# 2. Copy your `~/.ssh/id_rsa.pub` file(can be generated with `ssh-keygen` if missing) to a new folder named `client_keys`.
+#    Also add the `id_rsa.pub` files of all other users you want to be able to log in without a password to this folder.
+# 3. Create host keys for the sftp server in a new folder named `host_keys` by running `ssh-keygen -t rsa -b 4096 -f ssh_host_rsa_key`
+#    and `ssh-keygen -t ed25519 -f ssh_host_ed25519_key` in it.
+# 4. Create a Kubernetes secret from the client keys by running `kubectl create secret generic sftp-client-public-keys -n sftp --from-file=client_keys`.
+# 5. Create another Kubernetes secret from the host keys by running `kubectl create secret generic sftp-host-keys -n sftp --from-file=host_keys`.
+# 6. Apply this Kubernetes manifest by running `kubectl apply -f sftp.yaml`.
+# Your sftp server should now be fully set up and begin to start up.
+# You can check whether your sftp server has finished starting by running `kubectl get pods -n sftp`.
+# Once it shows status `RUNNING` for all pods your server should be ready.
+# You can now connect to it using `sftp -P 23 myUser@localhost`.
+# Note that you can't upload files to the user directory directly, so you have to switch to one of the directories specified below.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sftp
 apiVersion: v1
 kind: Namespace
 metadata:
