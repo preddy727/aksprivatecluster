@@ -288,7 +288,7 @@ NETWORK_NAME=$(az network vnet list \
 
 az network vnet subnet create --name $AKS_PE_SUBNET --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --address-prefixes $AKS_PE_SUBNET_CIDR
 az network vnet subnet update --name $AKS_PE_SUBNET --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --disable-private-endpoint-network-policies true
-az network private-endpoint create --name PrivateKubeApiEndpoint2 --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --subnet $AKS_PE_SUBNET --private-connection-resource-id $aksresourceid --group-ids management --connection-name myKubeConnection
+az network private-endpoint create --name PrivateKubeApiEndpoint2 --resource-group $ADO_PE_DEMO_RG --vnet-name $NETWORK_NAME --subnet $SUBNET_NAME --private-connection-resource-id $aksresourceid --group-ids management --connection-name myKubeConnection
 ##Go to the portal and get the ip address of the private-endpoint#############
 
 ##Duplicate the Private DNS zone saved earlier from the MC resource group in the Baston resource group"
